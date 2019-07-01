@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.testng.collections.Maps;
 
 
-public class RestTest {
+public class ParseTest {
 
   public static String BASE_URL = "http://localhost:8080";
 
@@ -35,4 +35,3 @@ public class RestTest {
     assertEquals(response.path("result"), "Drop{col=column}");
   }
 }
-

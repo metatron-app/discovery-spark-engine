@@ -20,4 +20,10 @@ public class DiscoveryPrepSparkEngineController {
   Map<String, Object> parseRule(@RequestBody Map<String, Object> request) {
     return service.parseRule((String) request.get("ruleString"));
   }
+
+  @RequestMapping(method = RequestMethod.POST, path = "/run", consumes = "application/JSON", produces = "application/JSON")
+  public @ResponseBody
+  Map<String, Object> run(@RequestBody Map<String, Object> request) {
+    return service.run(request);
+  }
 }
