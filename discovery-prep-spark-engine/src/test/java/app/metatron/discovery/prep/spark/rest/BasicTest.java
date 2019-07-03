@@ -26,20 +26,20 @@ public class BasicTest {
     return prepPropertiesInfo;
   }
 
-  Map<String, Object> buildDatasetInfo(String relPath, String delimiter, List<String> ruleStrings) {
+  Map<String, Object> buildDatasetInfo(String absPath, String delimiter, List<String> ruleStrings) {
     Map<String, Object> datasetInfo = new HashMap();
 
-    datasetInfo.put("storedUri", TestUtil.getResourcePath(relPath));
+    datasetInfo.put("storedUri", absPath);
     datasetInfo.put("delimiter", delimiter);
     datasetInfo.put("ruleStrings", ruleStrings);
 
     return datasetInfo;
   }
 
-  Map<String, Object> buildSnapshotInfo(String relPath, String format) {
+  Map<String, Object> buildSnapshotInfo(String absPath, String format) {
     Map<String, Object> snapshotInfo = new HashMap();
 
-    snapshotInfo.put("storedUri", "/tmp/dataprep/snapshots/" + relPath);
+    snapshotInfo.put("storedUri", absPath);
     snapshotInfo.put("ssType", "LOCAL");
     snapshotInfo.put("format", format);
 
@@ -56,12 +56,12 @@ public class BasicTest {
     return callbackInfo;
   }
 
-  void testCsvToCsv(String dsRelPath, List<String> ruleStrings, String ssRelPath) {
+  void testCsvToCsv(String dsPath, List<String> ruleStrings, String ssPath) {
     Map<String, Object> args = new HashMap();
 
     args.put("prepProperties", buildPrepPropertiesInfo());
-    args.put("datasetInfo", buildDatasetInfo(dsRelPath, ",", ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(ssRelPath, "CSV"));
+    args.put("datasetInfo", buildDatasetInfo(dsPath, ",", ruleStrings));
+    args.put("snapshotInfo", buildSnapshotInfo(ssPath, "CSV"));
     args.put("callbackInfo", buildCallbackInfo());
 
     Response response = given().contentType(ContentType.JSON)
@@ -86,8 +86,22 @@ public class BasicTest {
 
     ruleStrings.add("rename col: _c0 to: new_colname");
 
-    testCsvToCsv("csv/crime.csv", ruleStrings, "crime.snapshot.csv");
+    String dsPath = TestUtil.getResourcePath("csv/crime.csv");
+    String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
+
+    testCsvToCsv(dsPath, ruleStrings, ssPath);
   }
 
+  @Test
+  public void testLargeFile() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("rename col: _c0 to: new_colname");
+
+    String dsPath = "/tmp/dataprep/uploads/bigfile.csv";
+    String ssPath = "/tmp/dataprep/snapshots/bigfile.snapshot.csv";
+
+    testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
 }
 

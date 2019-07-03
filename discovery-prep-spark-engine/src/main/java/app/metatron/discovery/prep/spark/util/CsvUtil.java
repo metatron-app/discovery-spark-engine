@@ -179,7 +179,7 @@ public class CsvUtil {
 
     CSVPrinter printer;
     try {
-      printer = new CSVPrinter(writer, CSVFormat.RFC4180.withQuoteMode(QuoteMode.ALL_NON_NULL));
+      printer = new CSVPrinter(writer, CSVFormat.RFC4180.withQuoteMode(QuoteMode.MINIMAL));
     } catch (IOException e) {
       LOGGER.error("getPrinter(): Failed to get CSV printer: strUri={}", strUri);
       throw e;
