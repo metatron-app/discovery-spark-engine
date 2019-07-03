@@ -1,4 +1,4 @@
-package app.metatron.discovery.prep.spark;
+package app.metatron.discovery.prep.spark.util;
 
 import org.apache.spark.sql.SparkSession;
 

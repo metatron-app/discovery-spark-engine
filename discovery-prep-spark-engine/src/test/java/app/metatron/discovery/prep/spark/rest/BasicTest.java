@@ -3,7 +3,6 @@ package app.metatron.discovery.prep.spark.rest;
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import java.util.ArrayList;
@@ -18,12 +17,8 @@ public class BasicTest {
 
   public static String BASE_URL = "http://localhost:8080";
 
-  Map<String, Object> buildJsonPrepPropertiesInfo() throws JsonProcessingException {
+  Map<String, Object> buildPrepPropertiesInfo() {
     Map<String, Object> prepPropertiesInfo = new HashMap();
-
-    prepPropertiesInfo.put("polaris.dataprep.etl.limitRows", 1000000);
-    prepPropertiesInfo.put("polaris.dataprep.etl.cores", 0);
-    prepPropertiesInfo.put("polaris.dataprep.etl.timeout", 86400);
 
     prepPropertiesInfo.put("polaris.dataprep.spark.appName", "DiscoverySparkEngine");
     prepPropertiesInfo.put("polaris.dataprep.spark.master", "local");
@@ -31,32 +26,27 @@ public class BasicTest {
     return prepPropertiesInfo;
   }
 
-  Map<String, Object> buildJsonDatasetInfo(List<String> ruleStrings)
-      throws JsonProcessingException {
+  Map<String, Object> buildDatasetInfo(String relPath, String delimiter, List<String> ruleStrings) {
     Map<String, Object> datasetInfo = new HashMap();
 
-    datasetInfo.put("storedUri", TestUtil.getResourcePath("csv/crime.csv"));
-    datasetInfo.put("delimiter", ",");
+    datasetInfo.put("storedUri", TestUtil.getResourcePath(relPath));
+    datasetInfo.put("delimiter", delimiter);
     datasetInfo.put("ruleStrings", ruleStrings);
 
     return datasetInfo;
   }
 
-  Map<String, Object> buildJsonSnapshotInfo() throws JsonProcessingException {
+  Map<String, Object> buildSnapshotInfo(String relPath, String format) {
     Map<String, Object> snapshotInfo = new HashMap();
 
-    snapshotInfo.put("storedUri", "/tmp/dataprep/snapshots/crime.snapshot.csv");
-    snapshotInfo.put("ssType", "HDFS");
-    snapshotInfo.put("engine", "SPARK");
-    snapshotInfo.put("format", "CSV");
-    snapshotInfo.put("compression", "NONE");
-    snapshotInfo.put("ssName", "crime_20180913_053230");
-    snapshotInfo.put("ssId", "6e3eec52-fc60-4309-b0de-a53f93e08ce9");
+    snapshotInfo.put("storedUri", "/tmp/dataprep/snapshots/" + relPath);
+    snapshotInfo.put("ssType", "LOCAL");
+    snapshotInfo.put("format", format);
 
     return snapshotInfo;
   }
 
-  Map<String, Object> buildJsonCallbackInfo() throws JsonProcessingException {
+  Map<String, Object> buildCallbackInfo() {
     Map<String, Object> callbackInfo = new HashMap();
 
     callbackInfo.put("port", 8180);
@@ -66,16 +56,15 @@ public class BasicTest {
     return callbackInfo;
   }
 
-  void testCrime(List<String> ruleStrings) throws JsonProcessingException {
+  void testCsvToCsv(String dsRelPath, List<String> ruleStrings, String ssRelPath) {
     Map<String, Object> args = new HashMap();
 
-    args.put("prepProperties", buildJsonPrepPropertiesInfo());
-    args.put("datasetInfo", buildJsonDatasetInfo(ruleStrings));
-    args.put("snapshotInfo", buildJsonSnapshotInfo());
-    args.put("callbackInfo", buildJsonCallbackInfo());
+    args.put("prepProperties", buildPrepPropertiesInfo());
+    args.put("datasetInfo", buildDatasetInfo(dsRelPath, ",", ruleStrings));
+    args.put("snapshotInfo", buildSnapshotInfo(ssRelPath, "CSV"));
+    args.put("callbackInfo", buildCallbackInfo());
 
-    Response response = given()
-        .contentType(ContentType.JSON)
+    Response response = given().contentType(ContentType.JSON)
         .accept(ContentType.JSON)
         .when()
         .content(args)
@@ -92,12 +81,12 @@ public class BasicTest {
   }
 
   @Test
-  public void testRename() throws JsonProcessingException {
+  public void testRename() {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("rename col: _c0 to: new_colname");
 
-    testCrime(ruleStrings);
+    testCsvToCsv("csv/crime.csv", ruleStrings, "crime.snapshot.csv");
   }
 
 }
