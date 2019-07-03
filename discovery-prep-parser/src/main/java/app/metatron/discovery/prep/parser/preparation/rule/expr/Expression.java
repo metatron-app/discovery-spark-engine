@@ -14,9 +14,10 @@
 
 package app.metatron.discovery.prep.parser.preparation.rule.expr;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface Expression {
+public interface Expression extends Serializable {
 
   interface BooleanExpression extends Expression {
     <T extends Expression> List<T> getChildren();

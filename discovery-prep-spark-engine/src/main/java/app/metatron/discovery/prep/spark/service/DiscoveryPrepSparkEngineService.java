@@ -1,6 +1,7 @@
 package app.metatron.discovery.prep.spark.service;
 
 import app.metatron.discovery.prep.parser.preparation.RuleVisitorParser;
+import app.metatron.discovery.prep.parser.preparation.rule.Header;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.spark.PrepTransformer;
 import app.metatron.discovery.prep.spark.util.CsvUtil;
@@ -44,6 +45,26 @@ public class DiscoveryPrepSparkEngineService {
     return map;
   }
 
+  private boolean removeUnusedRules(List<String> ruleStrings) {
+    if (ruleStrings.size() > 0 && ruleStrings.get(0).startsWith("create")) {
+      ruleStrings.remove(0);
+    }
+
+    if (ruleStrings.size() > 0) {
+      String ruleString = ruleStrings.get(0);
+      Rule rule = (new RuleVisitorParser()).parse(ruleString);
+
+      if (rule instanceof Header) {
+        Header header = (Header) rule;
+        if (header.getRownum() == null || header.getRownum().longValue() == 1) {
+          ruleStrings.remove(0);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   public void run(Map<String, Object> args) throws URISyntaxException, IOException {
     Map<String, Object> prepProperties = (Map<String, Object>) args.get("prepProperties");
     Map<String, Object> datasetInfo = (Map<String, Object>) args.get("datasetInfo");
@@ -64,7 +85,7 @@ public class DiscoveryPrepSparkEngineService {
 
     // Load
     Dataset<Row> df = SparkUtil.getSession().read().format("CSV").option("delimiter", delimiter)
-        .option("header", false).load(dsStrUri);
+        .option("header", removeUnusedRules(ruleStrings)).load(dsStrUri);
 
     // Transform
     PrepTransformer transformer = new PrepTransformer();

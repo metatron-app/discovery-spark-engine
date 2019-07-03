@@ -93,6 +93,44 @@ public class BasicTest {
   }
 
   @Test
+  public void testHeader() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("rename col: `Date` to: `DT`");
+
+    String dsPath = TestUtil.getResourcePath("csv/crime.csv");
+    String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
+
+    testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
+
+  @Test
+  public void testWeirdHeader() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 5");
+
+    String dsPath = TestUtil.getResourcePath("csv/crime.csv");
+    String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
+
+    testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
+
+  @Test
+  public void testSplit() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("split col: _c0 on: '-' limit: 2");
+    ruleStrings.add("rename col: `Date` to: `DT`");
+
+    String dsPath = TestUtil.getResourcePath("csv/crime.csv");
+    String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
+
+    testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
+
+  @Test
   public void testLargeFile() {
     List<String> ruleStrings = new ArrayList();
 

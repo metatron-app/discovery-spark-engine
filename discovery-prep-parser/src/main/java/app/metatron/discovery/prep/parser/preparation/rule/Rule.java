@@ -14,9 +14,10 @@
 
 package app.metatron.discovery.prep.parser.preparation.rule;
 
+import java.io.Serializable;
 import java.util.function.Supplier;
 
-public interface Rule {
+public interface Rule extends Serializable {
 
   String getName();
 

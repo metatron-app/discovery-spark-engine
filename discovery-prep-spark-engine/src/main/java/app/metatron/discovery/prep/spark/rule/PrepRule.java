@@ -1,5 +1,6 @@
 package app.metatron.discovery.prep.spark.rule;
 
+import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier.IdentifierArrayExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier.IdentifierExpr;
@@ -21,10 +22,5 @@ public class PrepRule {
       }
     }
     return arr;
-  }
-
-  // All sub-classes should override this method
-  public static Dataset<Row> transform(Dataset<Row> df) {
-    return df;
   }
 }

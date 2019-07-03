@@ -16,12 +16,12 @@ package app.metatron.discovery.prep.parser.preparation.rule;
 
 public class Header implements Rule, Rule.Factory {
 
-  Long rownum;
+  Integer rownum;
 
   public Header() {
   }
 
-  public Header(Long rownum) {
+  public Header(Integer rownum) {
     this.rownum = rownum;
   }
 
@@ -30,11 +30,11 @@ public class Header implements Rule, Rule.Factory {
     return "header";
   }
 
-  public Long getRownum() {
+  public Integer getRownum() {
     return rownum;
   }
 
-  public void setRownum(Long rownum) {
+  public void setRownum(Integer rownum) {
     this.rownum = rownum;
   }
 
