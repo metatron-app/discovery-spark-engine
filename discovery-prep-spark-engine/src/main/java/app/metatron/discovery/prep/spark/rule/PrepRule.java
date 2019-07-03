@@ -12,18 +12,7 @@ import org.apache.spark.sql.SparkSession;
 
 public class PrepRule {
 
-  private SparkSession session;
-
-  public PrepRule() {
-    session = SparkUtil.getSession();
-  }
-
-  // Override this
-  public Dataset<Row> transform(Dataset<Row> df) {
-    return df;
-  }
-
-  public List<String> getIdentifierList(Expression expr) {
+  public static List<String> getIdentifierList(Expression expr) {
     List<String> arr = new ArrayList();
 
     if (expr instanceof IdentifierExpr) {
@@ -33,7 +22,11 @@ public class PrepRule {
         arr.add(identifier);
       }
     }
-
     return arr;
+  }
+
+  // All sub-classes should override this method
+  public static Dataset<Row> transform(Dataset<Row> df) {
+    return df;
   }
 }

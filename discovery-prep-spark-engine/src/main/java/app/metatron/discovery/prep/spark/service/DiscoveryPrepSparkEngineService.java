@@ -4,6 +4,7 @@ import app.metatron.discovery.prep.parser.preparation.RuleVisitorParser;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.spark.SparkUtil;
 import app.metatron.discovery.prep.spark.rule.PrepRename;
+import app.metatron.discovery.prep.spark.PrepTransformer;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,29 +47,34 @@ public class DiscoveryPrepSparkEngineService {
     String appName = (String) prepProperties.get("polaris.dataprep.spark.appName");
     String masterUri = (String) prepProperties.get("polaris.dataprep.spark.master");
 
-    String storedUri = (String) datasetInfo.get("storedUri");
+    String datasetStoredUri = (String) datasetInfo.get("storedUri");
     String delimiter = (String) datasetInfo.get("delimiter");
     List<String> ruleStrings = (List<String>) datasetInfo.get("ruleStrings");
-    String ruleString = ruleStrings.get(0);
 
-    String localBaseDir = (String) snapshotInfo.get("localBaseDir");
+    String snapshotStoredUri = (String) snapshotInfo.get("storedUri");
 
     SparkUtil.appName = appName;
     SparkUtil.masterUri = masterUri;
 
+    // Load
     Dataset<Row> df = SparkUtil.getSession().read().format("CSV").option("delimiter", delimiter)
-        .load(storedUri);
-    PrepRename prepRename = new PrepRename();
-    prepRename.parse(ruleString);
-    df = prepRename.transform(df);
+        .load(datasetStoredUri);
 
+    // Transform
+    PrepTransformer transformer = new PrepTransformer();
+
+    for (String ruleString : ruleStrings) {
+      df = transformer.applyRule(df, ruleString);
+    }
+
+    // Write
     try {
-      FileUtils.deleteDirectory(new File(localBaseDir + "/spark.result.csv"));
+      FileUtils.deleteDirectory(new File(snapshotStoredUri));
     } catch (IOException e) {
       e.printStackTrace();
     }
 
-    df.coalesce(1).write().option("header", "true").csv(localBaseDir + "/spark.result.csv");
+    df.coalesce(1).write().option("header", "true").csv(snapshotStoredUri);
 
     Map<String, Object> result = new HashMap();
     result.put("result", "OK");

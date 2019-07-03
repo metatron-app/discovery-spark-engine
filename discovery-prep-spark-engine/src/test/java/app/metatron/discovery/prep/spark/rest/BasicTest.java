@@ -4,7 +4,6 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 
@@ -47,8 +45,7 @@ public class BasicTest {
   Map<String, Object> buildJsonSnapshotInfo() throws JsonProcessingException {
     Map<String, Object> snapshotInfo = new HashMap();
 
-    snapshotInfo.put("localBaseDir", "/tmp");
-    snapshotInfo.put("stagingBaseDir", "/test");
+    snapshotInfo.put("storedUri", "/tmp/dataprep/snapshots/crime.snapshot.csv");
     snapshotInfo.put("ssType", "HDFS");
     snapshotInfo.put("engine", "SPARK");
     snapshotInfo.put("format", "CSV");
