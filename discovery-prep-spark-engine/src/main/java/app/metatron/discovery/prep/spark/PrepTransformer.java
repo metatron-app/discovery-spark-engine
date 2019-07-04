@@ -4,6 +4,7 @@ import app.metatron.discovery.prep.parser.preparation.RuleVisitorParser;
 import app.metatron.discovery.prep.parser.preparation.rule.Header;
 import app.metatron.discovery.prep.parser.preparation.rule.Rename;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
+import app.metatron.discovery.prep.spark.rule.PrepDrop;
 import app.metatron.discovery.prep.spark.rule.PrepHeader;
 import app.metatron.discovery.prep.spark.rule.PrepRename;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
@@ -30,6 +31,8 @@ public class PrepTransformer {
         return PrepRename.transform(df, rule);
       case "header":
         return PrepHeader.transform(df, rule);
+      case "drop":
+        return PrepDrop.transform(df, rule);
     }
 
     assert false : ruleString;

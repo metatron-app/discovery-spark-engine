@@ -118,6 +118,19 @@ public class BasicTest {
   }
 
   @Test
+  public void testDrop() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header");
+    ruleStrings.add("drop col: `Date`, `Location`");
+
+    String dsPath = TestUtil.getResourcePath("csv/crime.csv");
+    String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
+
+    testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
+
+  @Test
   public void testLargeFile() {
     List<String> ruleStrings = new ArrayList();
 
