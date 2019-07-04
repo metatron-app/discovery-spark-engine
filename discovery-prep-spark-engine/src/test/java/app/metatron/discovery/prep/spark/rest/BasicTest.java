@@ -118,26 +118,26 @@ public class BasicTest {
   }
 
   @Test
-  public void testSplit() {
-    List<String> ruleStrings = new ArrayList();
-
-    ruleStrings.add("split col: _c0 on: '-' limit: 2");
-    ruleStrings.add("rename col: `Date` to: `DT`");
-
-    String dsPath = TestUtil.getResourcePath("csv/crime.csv");
-    String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
-
-    testCsvToCsv(dsPath, ruleStrings, ssPath);
-  }
-
-  @Test
   public void testLargeFile() {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("rename col: _c0 to: new_colname");
 
     String dsPath = "/tmp/dataprep/uploads/bigfile.csv";
-    String ssPath = "/tmp/dataprep/snapshots/bigfile.snapshot.csv";
+    String ssPath = "/tmp/snapshots/bigfile.snapshot.csv";
+
+    testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
+
+  @Test
+  public void testDocker() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("rename col: `Date` to: `DT`");
+
+    String dsPath = "/tmp/dataprep/uploads/crime.csv";
+    String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
     testCsvToCsv(dsPath, ruleStrings, ssPath);
   }
