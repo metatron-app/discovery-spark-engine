@@ -23,4 +23,8 @@ public class PrepRule {
     }
     return arr;
   }
+
+  public static String asSparkExpr(String expr) {
+    return expr.replace("==", "=").replace("||", "OR").replace("&&", "AND");
+  }
 }

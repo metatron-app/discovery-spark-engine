@@ -144,6 +144,19 @@ public class BasicTest {
   }
 
   @Test
+  public void testDelete() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header");
+    ruleStrings.add("delete row: `Location` == 'NY' || `Location` == 'CA' || `Location` == 'US'");
+
+    String dsPath = TestUtil.getResourcePath("csv/crime.csv");
+    String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
+
+    testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
+
+  @Test
   public void testLargeFile() {
     List<String> ruleStrings = new ArrayList();
 
