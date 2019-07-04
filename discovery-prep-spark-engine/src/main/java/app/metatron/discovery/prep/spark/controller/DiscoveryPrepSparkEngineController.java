@@ -1,8 +1,8 @@
 package app.metatron.discovery.prep.spark.controller;
 
 import app.metatron.discovery.prep.spark.service.DiscoveryPrepSparkEngineService;
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -29,6 +29,28 @@ public class DiscoveryPrepSparkEngineController {
     return service.parseRule((String) request.get("ruleString"));
   }
 
+  Map<String, Object> buildSucceededResponse() {
+    Map<String, Object> response = new HashMap();
+    response.put("result", "SUCCEEDED");
+    return response;
+  }
+
+  Map<String, Object> buildFailedResponse(Throwable e) {
+    LOGGER.error("run(): failed with exception:", e);
+
+    Map<String, Object> response = new HashMap();
+    response.put("result", "FAILED");
+    response.put("exception", e.getClass().getName());
+    response.put("message", e.getMessage());
+    response.put("cause", e.getCause());
+
+    StringWriter sw = new StringWriter();
+    e.printStackTrace(new PrintWriter(sw));
+    response.put("trace", sw.toString());
+
+    return response;
+  }
+
   @RequestMapping(method = RequestMethod.POST, path = "/run", consumes = "application/JSON", produces = "application/JSON")
   public
   @ResponseBody
@@ -37,17 +59,9 @@ public class DiscoveryPrepSparkEngineController {
 
     try {
       service.run(request);
-      response.put("result", "OK");
-    } catch (URISyntaxException e) {
-      LOGGER.error("run(): URISyntaxException:", e);
-      response.put("result", "FAILED");
-      response.put("cause", "URISyntaxException");
-    } catch (IOException e) {
-      LOGGER.error("run(): IOException:", e);
-      response.put("result", "FAILED");
-      response.put("cause", "IOException");
+      return buildSucceededResponse();
+    } catch (Throwable e) {
+      return buildFailedResponse(e);
     }
-
-    return response;
   }
 }

@@ -1,7 +1,6 @@
 package app.metatron.discovery.prep.spark.rule;
 
 import app.metatron.discovery.prep.parser.preparation.rule.Drop;
-import app.metatron.discovery.prep.parser.preparation.rule.Rename;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
 import java.util.List;

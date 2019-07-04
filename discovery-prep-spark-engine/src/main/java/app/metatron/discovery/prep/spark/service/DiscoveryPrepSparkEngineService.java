@@ -17,6 +17,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.slf4j.Logger;
@@ -65,7 +66,8 @@ public class DiscoveryPrepSparkEngineService {
     return false;
   }
 
-  public void run(Map<String, Object> args) throws URISyntaxException, IOException {
+  public void run(Map<String, Object> args)
+      throws URISyntaxException, IOException, AnalysisException {
     Map<String, Object> prepProperties = (Map<String, Object>) args.get("prepProperties");
     Map<String, Object> datasetInfo = (Map<String, Object>) args.get("datasetInfo");
     Map<String, Object> snapshotInfo = (Map<String, Object>) args.get("snapshotInfo");

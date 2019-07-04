@@ -70,12 +70,12 @@ public class BasicTest {
         .content(args)
         .post(BASE_URL + "/run")
         .then()
-        .statusCode(HttpStatus.SC_OK)
         .log().all()
+        .statusCode(HttpStatus.SC_OK)
         .extract()
         .response();
 
-    assertEquals("OK", response.path("result"));
+    assertEquals("SUCCEEDED", response.path("result"));
 
     System.out.println(response.toString());
   }
@@ -123,6 +123,19 @@ public class BasicTest {
 
     ruleStrings.add("header");
     ruleStrings.add("drop col: `Date`, `Location`");
+
+    String dsPath = TestUtil.getResourcePath("csv/crime.csv");
+    String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
+
+    testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
+
+  @Test
+  public void testKeep() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header");
+    ruleStrings.add("keep row: `Location` == 'NY'");
 
     String dsPath = TestUtil.getResourcePath("csv/crime.csv");
     String ssPath = "/tmp/dataprep/snapshots/crime.snapshot.csv";
