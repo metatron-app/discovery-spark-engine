@@ -7,6 +7,7 @@ import app.metatron.discovery.prep.spark.rule.PrepDrop;
 import app.metatron.discovery.prep.spark.rule.PrepHeader;
 import app.metatron.discovery.prep.spark.rule.PrepKeep;
 import app.metatron.discovery.prep.spark.rule.PrepRename;
+import app.metatron.discovery.prep.spark.rule.PrepSet;
 import app.metatron.discovery.prep.spark.rule.PrepSetType;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
 import org.apache.spark.sql.AnalysisException;
@@ -40,6 +41,8 @@ public class PrepTransformer {
         return PrepDelete.transform(df, rule);
       case "settype":
         return PrepSetType.transform(df, rule);
+      case "set":
+        return PrepSet.transform(df, rule);
     }
 
     assert false : ruleString;
