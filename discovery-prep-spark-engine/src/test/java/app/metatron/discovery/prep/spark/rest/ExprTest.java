@@ -48,4 +48,43 @@ public class ExprTest {
 
     TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
   }
+
+  @Test
+  public void testReplaceLiteral() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("replace col: `business`, `base` on: 'Office' with: 'Desk'");
+
+    String dsPath = "/tmp/dataprep/uploads/sales_named.csv";
+    String ssPath = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+
+    TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
+
+  @Test
+  public void testReplaceRegExp() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("replace col: `due` on: /\\\\d/ with: 'x'");
+
+    String dsPath = "/tmp/dataprep/uploads/sales_named.csv";
+    String ssPath = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+
+    TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
+
+  @Test
+  public void testReplaceRegExpGroup() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("replace col: `due` on: /(\\\\d+).*(\\\\d+).*(\\\\d+).*/ with: '$1-$2-$3'");
+
+    String dsPath = "/tmp/dataprep/uploads/sales_named.csv";
+    String ssPath = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+
+    TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
+  }
 }
