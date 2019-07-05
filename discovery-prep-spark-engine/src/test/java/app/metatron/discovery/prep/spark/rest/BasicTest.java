@@ -156,7 +156,7 @@ public class BasicTest {
     testCsvToCsv(dsPath, ruleStrings, ssPath);
   }
 
-  @Test
+  //  @Test
   public void testLargeFile() {
     List<String> ruleStrings = new ArrayList();
 
@@ -168,7 +168,7 @@ public class BasicTest {
     testCsvToCsv(dsPath, ruleStrings, ssPath);
   }
 
-  @Test
+  //  @Test
   public void testDocker() {
     List<String> ruleStrings = new ArrayList();
 
