@@ -47,14 +47,23 @@ public class PrepRule {
 
     public String str;
     public List<String> arrStr;
+    public List<String> identifiers;    // for derive rule
+
+    public StrExpResult() {
+      identifiers = new ArrayList();
+    }
+
+    public StrExpResult(String str) {
+      this(str, Arrays.asList(str));
+    }
 
     public StrExpResult(String str, List<String> arrStr) {
       this.str = str;
       this.arrStr = arrStr;
     }
 
-    public StrExpResult(String str) {
-      this(str, Arrays.asList(str));
+    public void addIdentifier(String identifier) {
+      identifiers.add(identifier);
     }
 
     public int getArrSize() {
@@ -109,6 +118,8 @@ public class PrepRule {
       return null;
     }
 
+    StrExpResult result = new StrExpResult();
+
     if (expr instanceof IdentifierArrayExpr) {    // This should come first because this is the sub-class of Identifier
       IdentifierArrayExpr arrExpr = (IdentifierArrayExpr) expr;
       List<String> wrappedIdentifiers = new ArrayList();
@@ -118,7 +129,9 @@ public class PrepRule {
         relatedColNames.add(colName);
       }
 
-      return new StrExpResult(joinWithComma(wrappedIdentifiers), wrappedIdentifiers);
+      result.str = joinWithComma(wrappedIdentifiers);
+      result.arrStr = wrappedIdentifiers;
+      return result;
     } else if (expr instanceof Identifier) {
       String colName = expr.toString();
       relatedColNames.add(colName);
