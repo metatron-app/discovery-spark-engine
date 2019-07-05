@@ -11,7 +11,7 @@ import org.apache.spark.sql.Row;
 
 public class PrepSet extends PrepRule {
 
-  public static Dataset<Row> transform(Dataset<Row> df, Rule rule) throws AnalysisException {
+  public Dataset<Row> transform(Dataset<Row> df, Rule rule) throws AnalysisException {
     Set set = (Set) rule;
     Expression col = set.getCol();
     Expression value = set.getValue();

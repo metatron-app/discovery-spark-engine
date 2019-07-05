@@ -9,7 +9,7 @@ import org.apache.spark.sql.Row;
 
 public class PrepDrop extends PrepRule {
 
-  public static Dataset<Row> transform(Dataset<Row> df, Rule rule) {
+  public Dataset<Row> transform(Dataset<Row> df, Rule rule) {
     Dataset<Row> newDf = df;
 
     Drop drop = (Drop) rule;

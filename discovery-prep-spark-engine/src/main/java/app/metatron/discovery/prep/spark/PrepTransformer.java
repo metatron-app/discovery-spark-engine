@@ -30,19 +30,19 @@ public class PrepTransformer {
 
     switch (rule.getName()) {
       case "rename":
-        return PrepRename.transform(df, rule);
+        return (new PrepRename()).transform(df, rule);
       case "header":
-        return PrepHeader.transform(df, rule);
+        return (new PrepHeader()).transform(df, rule);
       case "drop":
-        return PrepDrop.transform(df, rule);
+        return (new PrepDrop()).transform(df, rule);
       case "keep":
-        return PrepKeep.transform(df, rule);
+        return (new PrepKeep()).transform(df, rule);
       case "delete":
-        return PrepDelete.transform(df, rule);
+        return (new PrepDelete()).transform(df, rule);
       case "settype":
-        return PrepSetType.transform(df, rule);
+        return (new PrepSetType()).transform(df, rule);
       case "set":
-        return PrepSet.transform(df, rule);
+        return (new PrepSet()).transform(df, rule);
     }
 
     assert false : ruleString;

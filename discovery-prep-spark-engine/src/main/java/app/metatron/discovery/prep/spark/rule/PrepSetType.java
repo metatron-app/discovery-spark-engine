@@ -12,7 +12,7 @@ import org.apache.spark.sql.types.StructField;
 
 public class PrepSetType extends PrepRule {
 
-  public static Dataset<Row> transform(Dataset<Row> df, Rule rule) throws AnalysisException {
+  public Dataset<Row> transform(Dataset<Row> df, Rule rule) throws AnalysisException {
     SetType settype = (SetType) rule;
     Expression col = settype.getCol();
     String toType = settype.getType().toLowerCase();

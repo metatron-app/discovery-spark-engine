@@ -17,14 +17,23 @@ import java.util.List;
 
 public class PrepRule {
 
-  public static List<String> getIdentifierList(Expression expr) {
+  List<String> relatedColNames;
+
+  public PrepRule() {
+    relatedColNames = new ArrayList();
+  }
+
+  public List<String> getIdentifierList(Expression expr) {
     List<String> arr = new ArrayList();
 
     if (expr instanceof IdentifierExpr) {
-      arr.add(((IdentifierExpr) expr).getValue());
+      String colName = ((IdentifierExpr) expr).getValue();
+      arr.add(colName);
+      relatedColNames.add(colName);
     } else {
-      for (String identifier : ((IdentifierArrayExpr) expr).getValue()) {
-        arr.add(identifier);
+      for (String colName : ((IdentifierArrayExpr) expr).getValue()) {
+        arr.add(colName);
+        relatedColNames.add(colName);
       }
     }
     return arr;
@@ -34,7 +43,7 @@ public class PrepRule {
     return expr.replace("==", "=").replace("||", "OR").replace("&&", "AND");
   }
 
-  public static class StrExpResult {
+  public class StrExpResult {
 
     public String str;
     public List<String> arrStr;
@@ -61,14 +70,14 @@ public class PrepRule {
     }
   }
 
-  private static String wrapIdentifier(String identifier) {
+  private String wrapIdentifier(String identifier) {
     if (!identifier.matches("[_a-zA-Z\u0080-\uFFFF]+[_a-zA-Z0-9\u0080-\uFFFF]*")) {  // if has odd characters
       return "`" + identifier + "`";
     }
     return identifier;
   }
 
-  private static StrExpResult wrapIdentifier(StrExpResult strExpResult) {
+  private StrExpResult wrapIdentifier(StrExpResult strExpResult) {
     for (int i = 0; i < strExpResult.arrStr.size(); i++) {
       strExpResult.arrStr.set(i, wrapIdentifier(strExpResult.arrStr.get(i)));
     }
@@ -76,7 +85,7 @@ public class PrepRule {
     return strExpResult;
   }
 
-  private static String stringifyFuncExpr(FunctionExpr funcExpr) {
+  private String stringifyFuncExpr(FunctionExpr funcExpr) {
     List<Expr> args = funcExpr.getArgs();
     String str = funcExpr.getName() + "(";
 
@@ -86,7 +95,7 @@ public class PrepRule {
     return str.substring(0, str.length() - 2) + ")";
   }
 
-  private static String joinWithComma(List<String> strs) {
+  private String joinWithComma(List<String> strs) {
     String resultStr = "";
 
     for (String str : strs) {
@@ -95,7 +104,7 @@ public class PrepRule {
     return resultStr.substring(0, resultStr.length() - 2);
   }
 
-  protected static StrExpResult stringifyExpr(Expression expr) {
+  protected StrExpResult stringifyExpr(Expression expr) {
     if (expr == null) {
       return null;
     }
@@ -106,11 +115,14 @@ public class PrepRule {
 
       for (String colName : arrExpr.getValue()) {
         wrappedIdentifiers.add(wrapIdentifier(colName));
+        relatedColNames.add(colName);
       }
 
       return new StrExpResult(joinWithComma(wrappedIdentifiers), wrappedIdentifiers);
     } else if (expr instanceof Identifier) {
-      return new StrExpResult(wrapIdentifier(expr.toString()));
+      String colName = expr.toString();
+      relatedColNames.add(colName);
+      return new StrExpResult(wrapIdentifier(colName));
     } else if (expr instanceof FunctionExpr) {
       return new StrExpResult(stringifyFuncExpr((FunctionExpr) expr));
     } else if (expr instanceof FunctionArrayExpr) {
