@@ -1,0 +1,68 @@
+version: "3.7"
+
+networks:
+  spark-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.5.0.0/16
+          # gateway: 10.5.0.1
+services:
+  spark-master:
+    image: spark-master:2.3.3
+    container_name: spark-master
+    hostname: spark-master
+    ports:
+      - "7080:7080"
+      - "7077:7077"
+    networks: 
+      spark-network:
+        ipv4_address: 10.5.0.2
+    environment:
+      - "SPARK_LOCAL_IP=spark-master"
+  spark-worker:
+    image: spark-worker:2.3.3
+    container_name: spark-worker
+    hostname: spark-worker
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+        #- "8090:8080"  
+    networks: 
+      spark-network:
+        ipv4_address: 10.5.0.3
+        #env_file: .env
+    environment:
+      - "SPARK_LOCAL_IP=spark-worker"
+
+  spark-app:
+    image: spark-app:1.0.0
+    container_name: spark-app
+    depends_on:
+      - spark-master
+    ports:
+      - 3000:3000
+    networks:
+      spark-network:
+        ipv4_address: 10.5.0.4
+    deploy:
+      resources:
+        limits:
+          memory: 8192M
+        #networks:
+        #spark-network:
+    #defaultriver: bridge
+    #ipam:
+    #driver: default
+    #config:
+    #  - subnet: 10.5.0.0/16
+        #spring-app:
+        #image: spring-app:1.0.0
+        #container_name: spring-app
+        #depends_on:
+        #- spark-master
+        #ports:
+        #- "8090:8080"
+    
