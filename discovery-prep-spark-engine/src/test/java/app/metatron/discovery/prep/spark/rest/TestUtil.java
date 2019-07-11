@@ -38,7 +38,8 @@ public class TestUtil {
     return prepPropertiesInfo;
   }
 
-  static Map<String, Object> buildDatasetInfo(String absPath, String delimiter, List<String> ruleStrings) {
+  static Map<String, Object> buildDatasetInfo(String absPath, String delimiter,
+      List<String> ruleStrings) {
     Map<String, Object> datasetInfo = new HashMap();
 
     datasetInfo.put("storedUri", absPath);

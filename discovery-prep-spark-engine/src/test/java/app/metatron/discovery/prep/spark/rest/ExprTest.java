@@ -15,10 +15,10 @@ public class ExprTest {
     ruleStrings.add("settype col: `sale_price` type: Double");
     ruleStrings.add("set col: `sale_price` value: sale_price * 100");
 
-    String dsPath = "/tmp/dataprep/uploads/sales_named.csv";
-    String ssPath = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
+    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -29,10 +29,10 @@ public class ExprTest {
     ruleStrings.add("settype col: `sale_price` type: Double");
     ruleStrings.add("derive value: `sale_price` as: `duplicated_sale_price`");
 
-    String dsPath = "/tmp/dataprep/uploads/sales_named.csv";
-    String ssPath = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
+    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -43,10 +43,10 @@ public class ExprTest {
     ruleStrings.add("settype col: `sale_price` type: Double");
     ruleStrings.add("derive value: `sale_price` * 100 as: after_inflation");
 
-    String dsPath = "/tmp/dataprep/uploads/sales_named.csv";
-    String ssPath = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
+    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -56,10 +56,10 @@ public class ExprTest {
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("replace col: `business`, `base` on: 'Office' with: 'Desk'");
 
-    String dsPath = "/tmp/dataprep/uploads/sales_named.csv";
-    String ssPath = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
+    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -69,10 +69,10 @@ public class ExprTest {
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("replace col: `due` on: /\\\\d/ with: 'x'");
 
-    String dsPath = "/tmp/dataprep/uploads/sales_named.csv";
-    String ssPath = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
+    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -82,9 +82,9 @@ public class ExprTest {
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("replace col: `due` on: /(\\\\d+).*(\\\\d+).*(\\\\d+).*/ with: '$1-$2-$3'");
 
-    String dsPath = "/tmp/dataprep/uploads/sales_named.csv";
-    String ssPath = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsPath, ruleStrings, ssPath);
+    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
   }
 }

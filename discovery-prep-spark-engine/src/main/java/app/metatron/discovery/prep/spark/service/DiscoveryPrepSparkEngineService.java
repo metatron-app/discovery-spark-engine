@@ -6,7 +6,6 @@ import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.spark.PrepTransformer;
 import app.metatron.discovery.prep.spark.util.CsvUtil;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,7 +13,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.AnalysisException;
@@ -105,11 +105,12 @@ public class DiscoveryPrepSparkEngineService {
 
     switch (uri.getScheme()) {
       case "file":
-        FileUtils.deleteDirectory(new File(ssStrUri));
-        CsvUtil.writeCsvToLocal(df, ssStrUri);
+        CsvUtil.writeCsv(df, ssStrUri, null);
         break;
       case "hdfs":
-        df.coalesce(1).write().option("header", "true").csv(ssStrUri);
+        Configuration conf = new Configuration();
+        conf.addResource(new Path(System.getenv("HADOOP_CONF_DIR") + "/core-site.xml"));
+        CsvUtil.writeCsv(df, ssStrUri, conf);
         break;
       default:
         LOGGER.error("Wrong uri scheme: " + uri);

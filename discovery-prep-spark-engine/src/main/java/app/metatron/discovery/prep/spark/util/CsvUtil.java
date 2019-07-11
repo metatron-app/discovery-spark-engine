@@ -13,7 +13,6 @@ import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.Iterator;
-import java.util.List;
 import javax.servlet.ServletOutputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -24,8 +23,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.types.StructField;
-import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -190,9 +187,9 @@ public class CsvUtil {
     return printer;
   }
 
-  public static void writeCsvToLocal(Dataset<Row> df, String strUri)
+  public static void writeCsv(Dataset<Row> df, String strUri, Configuration conf)
       throws IOException, URISyntaxException {
-    CSVPrinter printer = getPrinter(strUri, null);
+    CSVPrinter printer = getPrinter(strUri, conf);
 
     String[] colNames = df.columns();
 
