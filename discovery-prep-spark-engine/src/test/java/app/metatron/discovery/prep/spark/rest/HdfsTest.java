@@ -16,7 +16,7 @@ public class HdfsTest {
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -29,7 +29,7 @@ public class HdfsTest {
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -41,7 +41,7 @@ public class HdfsTest {
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -54,7 +54,7 @@ public class HdfsTest {
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -67,7 +67,7 @@ public class HdfsTest {
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -80,7 +80,7 @@ public class HdfsTest {
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 }
 

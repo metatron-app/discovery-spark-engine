@@ -16,7 +16,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -29,7 +29,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -41,7 +41,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -54,7 +54,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -67,7 +67,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -80,7 +80,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   //  @Test
@@ -92,7 +92,7 @@ public class BasicTest {
     String dsUri = "/tmp/dataprep/uploads/bigfile.csv";
     String ssUri = "/tmp/snapshots/bigfile.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   //  @Test
@@ -105,7 +105,7 @@ public class BasicTest {
     String dsUri = "/tmp/dataprep/uploads/crime.csv";
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 }
 

@@ -5,6 +5,7 @@ import app.metatron.discovery.prep.parser.preparation.rule.Header;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.spark.PrepTransformer;
 import app.metatron.discovery.prep.spark.util.CsvUtil;
+import app.metatron.discovery.prep.spark.util.JsonUtil;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.io.IOException;
 import java.net.URI;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.spark.api.java.JavaRDD;
@@ -20,6 +22,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +69,37 @@ public class DiscoveryPrepSparkEngineService {
     return false;
   }
 
+  private Dataset<Row> createStage0(Map<String, Object> datasetInfo)
+      throws IOException, URISyntaxException {
+    String importType = (String) datasetInfo.get("importType");
+    List<String> ruleStrings = (List<String>) datasetInfo.get("ruleStrings");
+
+    switch (importType) {
+      case "UPLOAD":
+      case "URI":
+        String storedUri = (String) datasetInfo.get("storedUri");
+        Integer columnCount = (Integer) datasetInfo.get("manualColumnCount");
+        String extensionType = FilenameUtils.getExtension(storedUri);
+
+        switch (extensionType.toUpperCase()) {
+          case "CSV":
+            String delimiter = (String) datasetInfo.get("delimiter");
+            return SparkUtil.getSession().read().format("CSV").option("delimiter", delimiter)
+                .option("header", removeUnusedRules(ruleStrings)).load(storedUri);
+          case "JSON":
+            StructType schema = JsonUtil.getSchemaFromJson(storedUri);
+            return SparkUtil.getSession().read().schema(schema).json(storedUri);
+          default:
+            throw new IOException("Wrong extensionType: " + extensionType);
+        }
+
+      case "STAGING_DB":
+      case "DATABASE":
+      default:
+        throw new IOException("Wrong importType: " + importType);
+    }
+  }
+
   public void run(Map<String, Object> args)
       throws URISyntaxException, IOException, AnalysisException {
     Map<String, Object> prepProperties = (Map<String, Object>) args.get("prepProperties");
@@ -76,44 +110,56 @@ public class DiscoveryPrepSparkEngineService {
     String appName = (String) prepProperties.get("polaris.dataprep.spark.appName");
     String masterUri = (String) prepProperties.get("polaris.dataprep.spark.master");
 
-    String dsStrUri = (String) datasetInfo.get("storedUri");
-    String delimiter = (String) datasetInfo.get("delimiter");
     List<String> ruleStrings = (List<String>) datasetInfo.get("ruleStrings");
 
-    String ssStrUri = (String) snapshotInfo.get("storedUri");
+    String ssType = (String) snapshotInfo.get("ssType");
+    String ssUri = (String) snapshotInfo.get("storedUri");
 
     SparkUtil.appName = appName;
     SparkUtil.masterUri = masterUri;
 
-    // Load
-    Dataset<Row> df = SparkUtil.getSession().read().format("CSV").option("delimiter", delimiter)
-        .option("header", removeUnusedRules(ruleStrings)).load(dsStrUri);
+    // Load dataset
+    Dataset<Row> df = createStage0(datasetInfo);
 
-    // Transform
+    // Transform dataset
     PrepTransformer transformer = new PrepTransformer();
-
     for (String ruleString : ruleStrings) {
       df = transformer.applyRule(df, ruleString);
     }
 
-    // Write
-    URI uri = new URI(ssStrUri);
-    if (uri.getScheme() == null) {
-      ssStrUri = "file://" + ssStrUri;
-      uri = new URI(ssStrUri);
-    }
+    // Write as snapshot
+    switch (ssType) {
+      case "LOCAL":
+        URI uri = new URI(ssUri);
+        if (uri.getScheme() == null) {
+          ssUri = "file://" + ssUri;
+          uri = new URI(ssUri);
+        }
 
-    switch (uri.getScheme()) {
-      case "file":
-        CsvUtil.writeCsv(df, ssStrUri, null);
+        switch (uri.getScheme()) {
+          case "file":
+            String extensionType = FilenameUtils.getExtension(ssUri);
+            if (extensionType.equals("JSON")) {
+              // TODO
+            } else {
+              CsvUtil.writeCsv(df, ssUri, null);
+            }
+
+            break;
+          case "hdfs":
+            Configuration conf = new Configuration();
+            conf.addResource(new Path(System.getenv("HADOOP_CONF_DIR") + "/core-site.xml"));
+            CsvUtil.writeCsv(df, ssUri, conf);
+            break;
+          default:
+            throw new IOException("Wrong uri scheme: " + uri);
+        }
+
         break;
-      case "hdfs":
-        Configuration conf = new Configuration();
-        conf.addResource(new Path(System.getenv("HADOOP_CONF_DIR") + "/core-site.xml"));
-        CsvUtil.writeCsv(df, ssStrUri, conf);
-        break;
+
+      case "STAGING_DB":
       default:
-        LOGGER.error("Wrong uri scheme: " + uri);
+        throw new IOException("Wrong ssType: " + ssType);
     }
   }
 }

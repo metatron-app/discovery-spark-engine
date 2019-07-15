@@ -38,11 +38,12 @@ public class TestUtil {
     return prepPropertiesInfo;
   }
 
-  static Map<String, Object> buildDatasetInfo(String absPath, String delimiter,
+  static Map<String, Object> buildDatasetInfo(String ssUri, String delimiter,
       List<String> ruleStrings) {
     Map<String, Object> datasetInfo = new HashMap();
 
-    datasetInfo.put("storedUri", absPath);
+    datasetInfo.put("importType", "URI");
+    datasetInfo.put("storedUri", ssUri);
     datasetInfo.put("delimiter", delimiter);
     datasetInfo.put("ruleStrings", ruleStrings);
 
@@ -69,12 +70,12 @@ public class TestUtil {
     return callbackInfo;
   }
 
-  static void testCsvToCsv(String dsPath, List<String> ruleStrings, String ssPath) {
+  static void testFileToCsv(String dsUri, List<String> ruleStrings, String ssUri) {
     Map<String, Object> args = new HashMap();
 
     args.put("prepProperties", buildPrepPropertiesInfo());
-    args.put("datasetInfo", buildDatasetInfo(dsPath, ",", ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(ssPath, "CSV"));
+    args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
+    args.put("snapshotInfo", buildSnapshotInfo(ssUri, "CSV"));
     args.put("callbackInfo", buildCallbackInfo());
 
     Response response = given().contentType(ContentType.JSON)
@@ -93,5 +94,28 @@ public class TestUtil {
     System.out.println(response.toString());
   }
 
+  static void testFileToJson(String dsUri, List<String> ruleStrings, String ssUri) {
+    Map<String, Object> args = new HashMap();
+
+    args.put("prepProperties", buildPrepPropertiesInfo());
+    args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
+    args.put("snapshotInfo", buildSnapshotInfo(ssUri, "JSON"));
+    args.put("callbackInfo", buildCallbackInfo());
+
+    Response response = given().contentType(ContentType.JSON)
+        .accept(ContentType.JSON)
+        .when()
+        .content(args)
+        .post(BASE_URL + "/run")
+        .then()
+        .log().all()
+        .statusCode(HttpStatus.SC_OK)
+        .extract()
+        .response();
+
+    assertEquals(response.path("result"), "SUCCEEDED");
+
+    System.out.println(response.toString());
+  }
 }
 

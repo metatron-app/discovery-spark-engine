@@ -18,7 +18,7 @@ public class ExprTest {
     String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -32,7 +32,7 @@ public class ExprTest {
     String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -46,7 +46,7 @@ public class ExprTest {
     String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -59,7 +59,7 @@ public class ExprTest {
     String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -72,7 +72,7 @@ public class ExprTest {
     String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -85,6 +85,6 @@ public class ExprTest {
     String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testCsvToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 }
