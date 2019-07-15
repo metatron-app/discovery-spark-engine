@@ -114,6 +114,7 @@ public class DiscoveryPrepSparkEngineService {
 
     String ssType = (String) snapshotInfo.get("ssType");
     String ssUri = (String) snapshotInfo.get("storedUri");
+    String ssFormat = ((String) snapshotInfo.get("format")).toUpperCase();
 
     SparkUtil.appName = appName;
     SparkUtil.masterUri = masterUri;
@@ -138,19 +139,24 @@ public class DiscoveryPrepSparkEngineService {
 
         switch (uri.getScheme()) {
           case "file":
-            String extensionType = FilenameUtils.getExtension(ssUri);
-            if (extensionType.equals("JSON")) {
-              // TODO
+            if (ssFormat.equals("JSON")) {
+              JsonUtil.writeJson(df, ssUri, null);
             } else {
               CsvUtil.writeCsv(df, ssUri, null);
             }
-
             break;
+
           case "hdfs":
             Configuration conf = new Configuration();
             conf.addResource(new Path(System.getenv("HADOOP_CONF_DIR") + "/core-site.xml"));
-            CsvUtil.writeCsv(df, ssUri, conf);
+
+            if (ssFormat.equals("JSON")) {
+              JsonUtil.writeJson(df, ssUri, conf);
+            } else {
+              CsvUtil.writeCsv(df, ssUri, conf);
+            }
             break;
+
           default:
             throw new IOException("Wrong uri scheme: " + uri);
         }

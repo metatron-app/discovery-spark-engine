@@ -2,19 +2,26 @@ package app.metatron.discovery.prep.spark.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
@@ -86,7 +93,8 @@ public class JsonUtil {
     }
   }
 
-  public static StructType getSchemaFromJson(String storedUri) throws URISyntaxException, IOException {
+  public static StructType getSchemaFromJson(String storedUri)
+      throws URISyntaxException, IOException {
     String line = readLineFromJson(storedUri);
     ObjectMapper mapper = new ObjectMapper();
 
@@ -116,5 +124,114 @@ public class JsonUtil {
     }
 
     return DataTypes.createStructType(fields);
+  }
+
+  public static void writeJson(Dataset<Row> df, String strUri, Configuration conf)
+      throws URISyntaxException, IOException {
+    Writer writer;
+    URI uri;
+
+    LOGGER.debug("writeJson(): strUri={} conf={}", strUri, conf);
+
+    try {
+      uri = new URI(strUri);
+    } catch (URISyntaxException e) {
+      LOGGER.error("writeJson(): URISyntaxException: strUri={}", strUri);
+      throw e;
+    }
+
+    switch (uri.getScheme()) {
+      case "hdfs":
+        if (conf == null) {
+          LOGGER.error(
+              "writeJson(): Required property missing: check polaris.dataprep.hadoopConfDir: strUri={}",
+              strUri);
+        }
+        Path path = new Path(uri);
+
+        FileSystem hdfsFs;
+
+        try {
+          hdfsFs = FileSystem.get(conf);
+        } catch (IOException e) {
+          LOGGER.error(
+              "writeJson(): Cannot get file system: check polaris.dataprep.hadoopConfDir: strUri={}",
+              strUri);
+          throw e;
+        }
+
+        FSDataOutputStream hos;
+        try {
+          hos = hdfsFs.create(path);
+        } catch (IOException e) {
+          LOGGER.error(
+              "writeJson(): Cannot create a file: polaris.dataprep.hadoopConfDir: strUri={}",
+              strUri);
+          throw e;
+        }
+
+        writer = new BufferedWriter(CsvUtil.getWriter(hos));
+        break;
+
+      case "file":
+        File file = new File(uri);
+        File dirParent = file.getParentFile();
+        assert dirParent != null : uri;
+
+        if (!dirParent.exists()) {
+          if (!dirParent.mkdirs()) {
+            String errmsg = "writeJson(): Cannot create a directory: " + strUri;
+            LOGGER.error(errmsg);
+            throw new IOException(errmsg);
+          }
+        }
+
+        FileOutputStream fos;
+        try {
+          fos = new FileOutputStream(file);
+        } catch (FileNotFoundException e) {
+          LOGGER.error(
+              "writeJson(): FileNotFoundException: Check the permission of snapshot directory: strUri={}",
+              strUri);
+          throw e;
+        }
+
+        writer = new BufferedWriter(CsvUtil.getWriter(fos));
+        break;
+
+      default:
+        String errmsg = "writeJson(): Unsupported URI scheme: " + strUri;
+        LOGGER.error(errmsg);
+        throw new IOException(errmsg);
+    }
+
+    String[] colNames = df.columns();
+    StringBuilder sb = new StringBuilder();
+    ObjectMapper mapper = new ObjectMapper();
+
+    Iterator iter = df.toLocalIterator();
+    while (iter.hasNext()) {
+      Row row = (Row) iter.next();
+      sb.append("{");
+      for (int i = 0; i < row.size(); i++) {
+        if (row.get(i) == null) {
+          continue;
+        }
+        sb.append("\"");
+        sb.append(colNames[i]);
+        sb.append("\"");
+
+        sb.append(":");
+        sb.append(mapper.writeValueAsString(row.get(i)));
+        sb.append(",");
+      }
+
+      sb.setLength(sb.length() - 1);  // At least one column should not be null
+      sb.append("}\n");
+
+      writer.write(sb.toString());
+      sb.setLength(0);
+    }
+    writer.close();
   }
 }
