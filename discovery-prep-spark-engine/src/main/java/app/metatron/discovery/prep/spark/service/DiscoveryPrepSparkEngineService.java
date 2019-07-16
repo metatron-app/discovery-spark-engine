@@ -51,6 +51,8 @@ public class DiscoveryPrepSparkEngineService {
   private Dataset<Row> createStage0(Map<String, Object> datasetInfo)
       throws IOException, URISyntaxException {
     String importType = (String) datasetInfo.get("importType");
+    String dbName = (String) datasetInfo.get("dbName");
+    String tblName = (String) datasetInfo.get("tblName");
     List<String> ruleStrings = (List<String>) datasetInfo.get("ruleStrings");
 
     switch (importType) {
@@ -73,6 +75,8 @@ public class DiscoveryPrepSparkEngineService {
         }
 
       case "STAGING_DB":
+        return SparkUtil.selectTableAll(dbName, tblName);
+
       case "DATABASE":
       default:
         throw new IOException("Wrong importType: " + importType);

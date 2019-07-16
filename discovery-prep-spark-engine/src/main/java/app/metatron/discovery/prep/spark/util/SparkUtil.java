@@ -56,28 +56,17 @@ public class SparkUtil {
     getSession().sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", fullName, tempViewName));
   }
 
-  public static void useDatabase(String dbName) {
-    getSession().sql("use " + dbName);
-  }
-
-  public static String getAppName() {
-    return appName;
+  public static Dataset<Row> selectTableAll(String dbName, String tblName) {
+    String fullName = dbName + "." + tblName;
+    return getSession().sql(String.format("SELECT * FROM %s", fullName));
   }
 
   public static void setAppName(String appName) {
     SparkUtil.appName = appName;
   }
 
-  public static String getMasterUri() {
-    return masterUri;
-  }
-
   public static void setMasterUri(String masterUri) {
     SparkUtil.masterUri = masterUri;
-  }
-
-  public static String getMetastoreUris() {
-    return metastoreUris;
   }
 
   public static void setMetastoreUris(String metastoreUris) {

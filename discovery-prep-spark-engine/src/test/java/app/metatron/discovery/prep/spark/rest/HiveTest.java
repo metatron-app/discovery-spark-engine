@@ -1,6 +1,7 @@
 package app.metatron.discovery.prep.spark.rest;
 
 import app.metatron.discovery.prep.spark.rest.TestUtil.StagingDbSnapshotInfo;
+import app.metatron.discovery.prep.spark.rest.TestUtil.TableInfo;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -17,14 +18,24 @@ public class HiveTest {
     // JSON -> Hive
     String dsUri = TestUtil.getResourcePath("json/crime.json");
 
-    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo();
-    snapshotInfo.dbName = "default";
-    snapshotInfo.tblName = "test_rename";
+    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_rename");
 
     TestUtil.testFileToHive(dsUri, ruleStrings, snapshotInfo);
   }
 
   @Test
+  public void testKeep() {    // This test-case depends on testRename()
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("keep row: `Location` == 'NY'");
+
+    TableInfo tableInfo = new TableInfo("default", "test_rename");
+    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_keep");
+
+    TestUtil.testHiveToHive(tableInfo, ruleStrings, snapshotInfo);
+  }
+
+//  @Test
   public void testDocker() {
     List<String> ruleStrings = new ArrayList();
 
@@ -33,9 +44,7 @@ public class HiveTest {
     // JSON -> Hive
     String dsUri = "/Users/jhkim/dataprep/uploads/crime.json";
 
-    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo();
-    snapshotInfo.dbName = "default";
-    snapshotInfo.tblName = "test_docker";
+    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_docker");
 
     TestUtil.testFileToHive(dsUri, ruleStrings, snapshotInfo);
   }

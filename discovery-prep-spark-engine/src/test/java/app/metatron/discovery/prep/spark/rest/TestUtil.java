@@ -51,6 +51,17 @@ public class TestUtil {
     return datasetInfo;
   }
 
+  static Map<String, Object> buildDatasetInfo(TableInfo tableInfo, List<String> ruleStrings) {
+    Map<String, Object> datasetInfo = new HashMap();
+
+    datasetInfo.put("importType", "STAGING_DB");
+    datasetInfo.put("dbName", tableInfo.dbName);
+    datasetInfo.put("tblName", tableInfo.tblName);
+    datasetInfo.put("ruleStrings", ruleStrings);
+
+    return datasetInfo;
+  }
+
   static Map<String, Object> buildSnapshotInfo(String absPath, String format) {
     Map<String, Object> snapshotInfo = new HashMap();
 
@@ -65,8 +76,8 @@ public class TestUtil {
     Map<String, Object> snapshotInfo = new HashMap();
 
     snapshotInfo.put("ssType", "STAGING_DB");
-    snapshotInfo.put("dbName", hiveSnapshotInfo.dbName);
-    snapshotInfo.put("tblName", hiveSnapshotInfo.tblName);
+    snapshotInfo.put("dbName", hiveSnapshotInfo.tableInfo.dbName);
+    snapshotInfo.put("tblName", hiveSnapshotInfo.tableInfo.tblName);
 
     return snapshotInfo;
   }
@@ -129,14 +140,31 @@ public class TestUtil {
     System.out.println(response.toString());
   }
 
-  public static class StagingDbSnapshotInfo {
+  public static class TableInfo {
 
     public String dbName;
     public String tblName;
 
+    public TableInfo() {
+    }
+
+    public TableInfo(String dbName, String tblName) {
+      this.dbName = dbName;
+      this.tblName = tblName;
+    }
+  }
+
+  public static class StagingDbSnapshotInfo {
+
+    TableInfo tableInfo;
+
     // TO BE ADDED (like compression, partition, append mode, ...)
 
     public StagingDbSnapshotInfo() {
+    }
+
+    public StagingDbSnapshotInfo(String dbName, String tblName) {
+      tableInfo = new TableInfo(dbName, tblName);
     }
   }
 
@@ -146,6 +174,31 @@ public class TestUtil {
 
     args.put("prepProperties", buildPrepPropertiesInfo());
     args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
+    args.put("snapshotInfo", buildSnapshotInfo(stagingDbSnapshotInfo));
+    args.put("callbackInfo", buildCallbackInfo());
+
+    Response response = given().contentType(ContentType.JSON)
+        .accept(ContentType.JSON)
+        .when()
+        .content(args)
+        .post(BASE_URL + "/run")
+        .then()
+        .log().all()
+        .statusCode(HttpStatus.SC_OK)
+        .extract()
+        .response();
+
+    assertEquals(response.path("result"), "SUCCEEDED");
+
+    System.out.println(response.toString());
+  }
+
+  static void testHiveToHive(TableInfo tableInfo, List<String> ruleStrings,
+      StagingDbSnapshotInfo stagingDbSnapshotInfo) {
+    Map<String, Object> args = new HashMap();
+
+    args.put("prepProperties", buildPrepPropertiesInfo());
+    args.put("datasetInfo", buildDatasetInfo(tableInfo, ruleStrings));
     args.put("snapshotInfo", buildSnapshotInfo(stagingDbSnapshotInfo));
     args.put("callbackInfo", buildCallbackInfo());
 
