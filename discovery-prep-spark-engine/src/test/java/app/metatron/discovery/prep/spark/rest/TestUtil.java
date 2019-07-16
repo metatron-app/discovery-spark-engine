@@ -33,7 +33,8 @@ public class TestUtil {
     Map<String, Object> prepPropertiesInfo = new HashMap();
 
     prepPropertiesInfo.put("polaris.dataprep.spark.appName", "DiscoverySparkEngine");
-    prepPropertiesInfo.put("polaris.dataprep.spark.master", "local");
+    prepPropertiesInfo.put("polaris.dataprep.spark.master", "local[*]");
+    prepPropertiesInfo.put("polaris.storage.stagedb.metastore.uri", "thrift://m15:9083");
 
     return prepPropertiesInfo;
   }
@@ -56,6 +57,16 @@ public class TestUtil {
     snapshotInfo.put("storedUri", absPath);
     snapshotInfo.put("ssType", "LOCAL");
     snapshotInfo.put("format", format);
+
+    return snapshotInfo;
+  }
+
+  static Map<String, Object> buildSnapshotInfo(StagingDbSnapshotInfo hiveSnapshotInfo) {
+    Map<String, Object> snapshotInfo = new HashMap();
+
+    snapshotInfo.put("ssType", "STAGING_DB");
+    snapshotInfo.put("dbName", hiveSnapshotInfo.dbName);
+    snapshotInfo.put("tblName", hiveSnapshotInfo.tblName);
 
     return snapshotInfo;
   }
@@ -100,6 +111,42 @@ public class TestUtil {
     args.put("prepProperties", buildPrepPropertiesInfo());
     args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
     args.put("snapshotInfo", buildSnapshotInfo(ssUri, "JSON"));
+    args.put("callbackInfo", buildCallbackInfo());
+
+    Response response = given().contentType(ContentType.JSON)
+        .accept(ContentType.JSON)
+        .when()
+        .content(args)
+        .post(BASE_URL + "/run")
+        .then()
+        .log().all()
+        .statusCode(HttpStatus.SC_OK)
+        .extract()
+        .response();
+
+    assertEquals(response.path("result"), "SUCCEEDED");
+
+    System.out.println(response.toString());
+  }
+
+  public static class StagingDbSnapshotInfo {
+
+    public String dbName;
+    public String tblName;
+
+    // TO BE ADDED (like compression, partition, append mode, ...)
+
+    public StagingDbSnapshotInfo() {
+    }
+  }
+
+  static void testFileToHive(String dsUri, List<String> ruleStrings,
+      StagingDbSnapshotInfo stagingDbSnapshotInfo) {
+    Map<String, Object> args = new HashMap();
+
+    args.put("prepProperties", buildPrepPropertiesInfo());
+    args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
+    args.put("snapshotInfo", buildSnapshotInfo(stagingDbSnapshotInfo));
     args.put("callbackInfo", buildCallbackInfo());
 
     Response response = given().contentType(ContentType.JSON)

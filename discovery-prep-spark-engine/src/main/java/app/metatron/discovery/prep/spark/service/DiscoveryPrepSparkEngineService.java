@@ -10,44 +10,23 @@ import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DiscoveryPrepSparkEngineService {
 
   private static Logger LOGGER = LoggerFactory.getLogger(DiscoveryPrepSparkEngineService.class);
-
-  @Autowired
-  JavaSparkContext sc;
-
-  public Map<String, Object> parseRule(String ruleString) {
-    Rule rule = new RuleVisitorParser().parse(ruleString);
-    HashMap<String, Object> map = new HashMap();
-    map.put("result", rule.toString());
-
-    List<String> wordList = Arrays.asList(ruleString.split(" "));
-    JavaRDD<String> words = sc.parallelize(wordList);
-    Map<String, Long> wordCounts = words.countByValue();
-    map.put("wordCount", wordCounts);
-
-    return map;
-  }
 
   private boolean removeUnusedRules(List<String> ruleStrings) {
     if (ruleStrings.size() > 0 && ruleStrings.get(0).startsWith("create")) {
@@ -109,15 +88,21 @@ public class DiscoveryPrepSparkEngineService {
 
     String appName = (String) prepProperties.get("polaris.dataprep.spark.appName");
     String masterUri = (String) prepProperties.get("polaris.dataprep.spark.master");
+    String metastoreUris = (String) prepProperties.get("polaris.storage.stagedb.metastore.uri");
 
     List<String> ruleStrings = (List<String>) datasetInfo.get("ruleStrings");
 
     String ssType = (String) snapshotInfo.get("ssType");
     String ssUri = (String) snapshotInfo.get("storedUri");
-    String ssFormat = ((String) snapshotInfo.get("format")).toUpperCase();
+    String ssFormat = (String) snapshotInfo.get("format");
+    String dbName = (String) snapshotInfo.get("dbName");
+    String tblName = (String) snapshotInfo.get("tblName");
 
-    SparkUtil.appName = appName;
-    SparkUtil.masterUri = masterUri;
+    SparkUtil.setAppName(appName);
+    SparkUtil.setMasterUri(masterUri);
+    if (metastoreUris != null) {
+      SparkUtil.setMetastoreUris(metastoreUris);
+    }
 
     // Load dataset
     Dataset<Row> df = createStage0(datasetInfo);
@@ -164,8 +149,14 @@ public class DiscoveryPrepSparkEngineService {
         break;
 
       case "STAGING_DB":
+        assert metastoreUris != null;
+        SparkUtil.createTable(df, dbName, tblName);
+        break;
+
       default:
         throw new IOException("Wrong ssType: " + ssType);
     }
+
+    SparkUtil.stopSession();
   }
 }

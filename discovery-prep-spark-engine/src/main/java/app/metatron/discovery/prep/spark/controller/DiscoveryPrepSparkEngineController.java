@@ -1,6 +1,9 @@
 package app.metatron.discovery.prep.spark.controller;
 
+import static app.metatron.discovery.prep.spark.util.SparkUtil.stopSession;
+
 import app.metatron.discovery.prep.spark.service.DiscoveryPrepSparkEngineService;
+import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -21,13 +24,6 @@ public class DiscoveryPrepSparkEngineController {
 
   @Autowired
   DiscoveryPrepSparkEngineService service;
-
-  @RequestMapping(method = RequestMethod.POST, path = "/parse", consumes = "application/JSON", produces = "application/JSON")
-  public
-  @ResponseBody
-  Map<String, Object> parseRule(@RequestBody Map<String, Object> request) {
-    return service.parseRule((String) request.get("ruleString"));
-  }
 
   Map<String, Object> buildSucceededResponse() {
     Map<String, Object> response = new HashMap();
@@ -59,9 +55,12 @@ public class DiscoveryPrepSparkEngineController {
 
     try {
       service.run(request);
-      return buildSucceededResponse();
+      response = buildSucceededResponse();
     } catch (Throwable e) {
-      return buildFailedResponse(e);
+      response = buildFailedResponse(e);
     }
+
+    stopSession();
+    return response;
   }
 }
