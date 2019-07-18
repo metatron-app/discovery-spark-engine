@@ -93,6 +93,8 @@ public class DiscoveryPrepSparkEngineService {
     String appName = (String) prepProperties.get("polaris.dataprep.spark.appName");
     String masterUri = (String) prepProperties.get("polaris.dataprep.spark.master");
     String metastoreUris = (String) prepProperties.get("polaris.storage.stagedb.metastore.uri");
+    String warehouseDir = (String) prepProperties.get("polaris.dataprep.spark.warehouseDir");
+    String defaultFS = (String) prepProperties.get("polaris.dataprep.spark.defaultFS");
 
     List<String> ruleStrings = (List<String>) datasetInfo.get("ruleStrings");
 
@@ -104,8 +106,12 @@ public class DiscoveryPrepSparkEngineService {
 
     SparkUtil.setAppName(appName);
     SparkUtil.setMasterUri(masterUri);
+    SparkUtil.setDefaultFS(defaultFS);
+
     if (metastoreUris != null) {
       SparkUtil.setMetastoreUris(metastoreUris);
+      assert warehouseDir != null;
+      SparkUtil.setWarehouseDir(warehouseDir);
     }
 
     // Load dataset

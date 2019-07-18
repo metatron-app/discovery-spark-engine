@@ -35,16 +35,16 @@ public class HiveTest {
     TestUtil.testHiveToHive(tableInfo, ruleStrings, snapshotInfo);
   }
 
-//  @Test
+  @Test
   public void testDocker() {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("rename col: Date to: dt");
 
     // JSON -> Hive
-    String dsUri = "/Users/jhkim/dataprep/uploads/crime.json";
+    String dsUri = "file:///Users/jhkim/dataprep/uploads/crime.json";
 
-    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_docker");
+    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_docker3");
 
     TestUtil.testFileToHive(dsUri, ruleStrings, snapshotInfo);
   }

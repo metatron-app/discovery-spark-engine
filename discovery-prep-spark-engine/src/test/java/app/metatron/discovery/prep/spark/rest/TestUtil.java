@@ -6,7 +6,12 @@ import static org.testng.Assert.assertEquals;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import java.io.File;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +20,7 @@ import org.apache.commons.httpclient.HttpStatus;
 
 public class TestUtil {
 
-  public static String BASE_URL = "http://localhost:8080";
+  public static String BASE_URL = "http://localhost:5300";
 
   static String getResourcePath(String relPath, boolean fromHdfs) {
     if (fromHdfs) {
@@ -29,12 +34,43 @@ public class TestUtil {
     return getResourcePath(relPath, false);
   }
 
+  static String getMyIp() {
+    try {
+      Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+      while (interfaces.hasMoreElements()) {
+        NetworkInterface iface = interfaces.nextElement();
+        if (iface.isLoopback() || !iface.isUp() || iface.isVirtual() || iface.isPointToPoint()) {
+          continue;
+        }
+
+        Enumeration<InetAddress> addresses = iface.getInetAddresses();
+        while (addresses.hasMoreElements()) {
+          InetAddress addr = addresses.nextElement();
+
+          final String ip = addr.getHostAddress();
+          if (Inet4Address.class == addr.getClass()) {
+            return ip;
+          }
+        }
+      }
+    } catch (SocketException e) {
+      throw new RuntimeException(e);
+    }
+    return null;
+  }
+
   static Map<String, Object> buildPrepPropertiesInfo() {
     Map<String, Object> prepPropertiesInfo = new HashMap();
 
+    String uri = "thrift://" + getMyIp() + ":9083";
+    String defaultFS = "hdfs://" + "m15" + ":9000";
+    String warehouseDir = defaultFS + "/user/hive/warehouse2";
+
     prepPropertiesInfo.put("polaris.dataprep.spark.appName", "DiscoverySparkEngine");
-    prepPropertiesInfo.put("polaris.dataprep.spark.master", "local[*]");
-    prepPropertiesInfo.put("polaris.storage.stagedb.metastore.uri", "thrift://m15:9083");
+    prepPropertiesInfo.put("polaris.dataprep.spark.master", "local");
+    prepPropertiesInfo.put("polaris.storage.stagedb.metastore.uri", uri);
+    prepPropertiesInfo.put("polaris.dataprep.spark.warehouseDir", warehouseDir);
+    prepPropertiesInfo.put("polaris.dataprep.spark.defaultFS", defaultFS);
 
     return prepPropertiesInfo;
   }

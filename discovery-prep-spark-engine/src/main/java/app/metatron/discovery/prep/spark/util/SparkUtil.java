@@ -14,6 +14,8 @@ public class SparkUtil {
   private static String appName;
   private static String masterUri;
   private static String metastoreUris;
+  private static String warehouseDir;
+  private static String defaultFS;
 
   public static SparkSession getSession() {
     if (session == null) {
@@ -22,8 +24,11 @@ public class SparkUtil {
           .master(masterUri);
 
       if (metastoreUris != null) {
+        assert warehouseDir != null : metastoreUris;
+
         builder = builder
-            .config("spark.sql.warehouse.dir", "hdfs://localhost:9000/user/hive/warehouse2")
+            .config("spark.hadoop.fs.defaultFS", defaultFS)
+            .config("spark.sql.warehouse.dir", warehouseDir)
             .config("spark.sql.catalogImplementation", "hive")
             .config("hive.metastore.uris", metastoreUris)
             .enableHiveSupport();
@@ -71,5 +76,13 @@ public class SparkUtil {
 
   public static void setMetastoreUris(String metastoreUris) {
     SparkUtil.metastoreUris = metastoreUris;
+  }
+
+  public static void setWarehouseDir(String warehouseDir) {
+    SparkUtil.warehouseDir = warehouseDir;
+  }
+
+  public static void setDefaultFS(String defaultFS) {
+    SparkUtil.defaultFS = defaultFS;
   }
 }
