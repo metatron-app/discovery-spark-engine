@@ -3,7 +3,6 @@ package app.metatron.discovery.prep.spark.controller;
 import static app.metatron.discovery.prep.spark.util.SparkUtil.stopSession;
 
 import app.metatron.discovery.prep.spark.service.DiscoveryPrepSparkEngineService;
-import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -48,10 +47,9 @@ public class DiscoveryPrepSparkEngineController {
   }
 
   @RequestMapping(method = RequestMethod.POST, path = "/run", consumes = "application/JSON", produces = "application/JSON")
-  public
   @ResponseBody
-  Map<String, Object> run(@RequestBody Map<String, Object> request) {
-    Map<String, Object> response = new HashMap();
+  public Map<String, Object> run(@RequestBody Map<String, Object> request) {
+    Map<String, Object> response;
 
     try {
       service.run(request);
@@ -62,5 +60,11 @@ public class DiscoveryPrepSparkEngineController {
 
     stopSession();
     return response;
+  }
+
+  @RequestMapping(method = RequestMethod.POST, path = "/ping", consumes = "application/JSON", produces = "application/JSON")
+  @ResponseBody
+  public Map<String, Object> ping() {
+    return buildSucceededResponse();
   }
 }

@@ -8,6 +8,12 @@ import org.junit.Test;
 public class BasicTest {
 
   @Test
+  public void testPing() {
+
+    TestUtil.testPing();
+  }
+
+  @Test
   public void testRename() {
     List<String> ruleStrings = new ArrayList();
 

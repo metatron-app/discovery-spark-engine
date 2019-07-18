@@ -59,6 +59,22 @@ public class TestUtil {
     return null;
   }
 
+  static void testPing() {
+    Response response = given().contentType(ContentType.JSON)
+        .accept(ContentType.JSON)
+        .when()
+        .post(BASE_URL + "/ping")
+        .then()
+        .log().all()
+        .statusCode(HttpStatus.SC_OK)
+        .extract()
+        .response();
+
+    assertEquals(response.path("result"), "SUCCEEDED");
+
+    System.out.println(response.toString());
+  }
+
   static Map<String, Object> buildPrepPropertiesInfo() {
     Map<String, Object> prepPropertiesInfo = new HashMap();
 
