@@ -5,7 +5,6 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.SparkSession.Builder;
-import org.apache.spark.sql.hive.HiveSessionStateBuilder;
 
 public class SparkUtil {
 
@@ -15,7 +14,6 @@ public class SparkUtil {
   private static String masterUri;
   private static String metastoreUris;
   private static String warehouseDir;
-  private static String defaultFS;
 
   public static SparkSession getSession() {
     if (session == null) {
@@ -27,7 +25,6 @@ public class SparkUtil {
         assert warehouseDir != null : metastoreUris;
 
         builder = builder
-            .config("spark.hadoop.fs.defaultFS", defaultFS)
             .config("spark.sql.warehouse.dir", warehouseDir)
             .config("spark.sql.catalogImplementation", "hive")
             .config("hive.metastore.uris", metastoreUris)
@@ -46,19 +43,25 @@ public class SparkUtil {
     }
   }
 
-  // FIXME: Useless wrapper
-  public static void createView(Dataset<Row> df, String viewName) throws AnalysisException {
-    df.createOrReplaceTempView(viewName);
+  public static void createTempView(Dataset<Row> df, String tempViewName) {
+    df.createOrReplaceTempView(tempViewName);
   }
 
-  public static void createTable(Dataset<Row> df, String dbName, String tblName)
-      throws AnalysisException {
-    String tempViewName = tblName + "_temp_view";
-    createView(df, tempViewName);
+  public static void prepareCreateTable(Dataset<Row> df, String fullName) throws AnalysisException {
+    createTempView(df, "temp");
+    getSession().sql(String.format("DROP TABLE %s PURGE", fullName));
+  }
 
+  public static void createTable(Dataset<Row> df, String dbName, String tblName) {
     String fullName = dbName + "." + tblName;
-    getSession().sql(String.format("DROP TABLE IF EXISTS %s", fullName));
-    getSession().sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", fullName, tempViewName));
+    try {
+      prepareCreateTable(df, fullName);
+    } catch (AnalysisException e) {
+      // NOTE:
+      // This is a trick to catch "table not found" exception from DROP TABLE statement
+      // The compiler knows DROP TABLE does not throw AnalysisException. (Why?)
+    }
+    getSession().sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", fullName, "temp"));
   }
 
   public static Dataset<Row> selectTableAll(String dbName, String tblName) {
@@ -80,9 +83,5 @@ public class SparkUtil {
 
   public static void setWarehouseDir(String warehouseDir) {
     SparkUtil.warehouseDir = warehouseDir;
-  }
-
-  public static void setDefaultFS(String defaultFS) {
-    SparkUtil.defaultFS = defaultFS;
   }
 }

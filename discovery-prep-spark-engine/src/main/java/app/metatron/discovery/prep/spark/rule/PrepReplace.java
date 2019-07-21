@@ -19,7 +19,7 @@ public class PrepReplace extends PrepRule {
     Expression on = replace.getOn();
     String with = (String) replace.getWith().getValue();
 
-    SparkUtil.createView(df, "temp");
+    SparkUtil.createTempView(df, "temp");
 
     List<String> targetColNames = getIdentifierList(col);
     String[] colNames = df.columns();

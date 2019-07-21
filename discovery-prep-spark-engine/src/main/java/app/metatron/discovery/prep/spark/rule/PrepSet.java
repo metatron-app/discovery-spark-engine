@@ -17,7 +17,7 @@ public class PrepSet extends PrepRule {
     Expression value = set.getValue();
     Expression row = set.getRow();
 
-    SparkUtil.createView(df, "temp");
+    SparkUtil.createTempView(df, "temp");
 
     List<String> targetColNames = getIdentifierList(col);
     String[] colNames = df.columns();

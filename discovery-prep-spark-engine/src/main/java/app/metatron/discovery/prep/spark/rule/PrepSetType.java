@@ -18,7 +18,7 @@ public class PrepSetType extends PrepRule {
     String toType = settype.getType().toLowerCase();
     String format = settype.getFormat();
 
-    SparkUtil.createView(df, "temp");
+    SparkUtil.createTempView(df, "temp");
 
     List<String> targetColNames = getIdentifierList(col);
     String[] colNames = df.columns();

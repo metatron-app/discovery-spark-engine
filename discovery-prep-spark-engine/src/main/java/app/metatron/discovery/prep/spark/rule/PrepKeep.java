@@ -14,7 +14,7 @@ public class PrepKeep extends PrepRule {
     Keep keep = (Keep) rule;
     Expression row = keep.getRow();
 
-    SparkUtil.createView(df, "temp");
+    SparkUtil.createTempView(df, "temp");
 
     String sql = "SELECT * FROM temp WHERE " + asSparkExpr(row.toString());
     return SparkUtil.getSession().sql(sql);

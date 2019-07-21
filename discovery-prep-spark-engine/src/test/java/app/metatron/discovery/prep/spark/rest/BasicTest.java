@@ -89,27 +89,14 @@ public class BasicTest {
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }
 
-  //  @Test
+  @Test
   public void testLargeFile() {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("rename col: _c0 to: new_colname");
 
     String dsUri = "/tmp/dataprep/uploads/bigfile.csv";
-    String ssUri = "/tmp/snapshots/bigfile.snapshot.csv";
-
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
-  }
-
-  //  @Test
-  public void testDocker() {
-    List<String> ruleStrings = new ArrayList();
-
-    ruleStrings.add("header rownum: 1");
-    ruleStrings.add("rename col: `Date` to: `DT`");
-
-    String dsUri = "/tmp/dataprep/uploads/crime.csv";
-    String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
+    String ssUri = "/tmp/dataprep/snapshots/bigfile.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
   }

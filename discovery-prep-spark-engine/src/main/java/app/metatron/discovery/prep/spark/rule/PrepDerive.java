@@ -17,7 +17,7 @@ public class PrepDerive extends PrepRule {
     Expression value = derive.getValue();
     String as = derive.getAs();
 
-    SparkUtil.createView(df, "temp");
+    SparkUtil.createTempView(df, "temp");
 
     StrExpResult result = stringifyExpr(value);
     String strExpr = result.str;

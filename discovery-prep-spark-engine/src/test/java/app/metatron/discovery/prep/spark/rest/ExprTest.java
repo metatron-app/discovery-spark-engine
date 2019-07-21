@@ -15,7 +15,7 @@ public class ExprTest {
     ruleStrings.add("settype col: `sale_price` type: Double");
     ruleStrings.add("set col: `sale_price` value: sale_price * 100");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
@@ -29,7 +29,7 @@ public class ExprTest {
     ruleStrings.add("settype col: `sale_price` type: Double");
     ruleStrings.add("derive value: `sale_price` as: `duplicated_sale_price`");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
@@ -43,7 +43,7 @@ public class ExprTest {
     ruleStrings.add("settype col: `sale_price` type: Double");
     ruleStrings.add("derive value: `sale_price` * 100 as: after_inflation");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
@@ -56,7 +56,7 @@ public class ExprTest {
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("replace col: `business`, `base` on: 'Office' with: 'Desk'");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
@@ -69,7 +69,7 @@ public class ExprTest {
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("replace col: `due` on: /\\\\d/ with: 'x'");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
@@ -82,7 +82,7 @@ public class ExprTest {
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("replace col: `due` on: /(\\\\d+).*(\\\\d+).*(\\\\d+).*/ with: '$1-$2-$3'");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);

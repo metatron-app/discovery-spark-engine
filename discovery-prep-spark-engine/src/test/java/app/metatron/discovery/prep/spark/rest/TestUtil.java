@@ -34,31 +34,6 @@ public class TestUtil {
     return getResourcePath(relPath, false);
   }
 
-  static String getMyIp() {
-    try {
-      Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-      while (interfaces.hasMoreElements()) {
-        NetworkInterface iface = interfaces.nextElement();
-        if (iface.isLoopback() || !iface.isUp() || iface.isVirtual() || iface.isPointToPoint()) {
-          continue;
-        }
-
-        Enumeration<InetAddress> addresses = iface.getInetAddresses();
-        while (addresses.hasMoreElements()) {
-          InetAddress addr = addresses.nextElement();
-
-          final String ip = addr.getHostAddress();
-          if (Inet4Address.class == addr.getClass()) {
-            return ip;
-          }
-        }
-      }
-    } catch (SocketException e) {
-      throw new RuntimeException(e);
-    }
-    return null;
-  }
-
   static void testPing() {
     Response response = given().contentType(ContentType.JSON)
         .accept(ContentType.JSON)
@@ -78,15 +53,13 @@ public class TestUtil {
   static Map<String, Object> buildPrepPropertiesInfo() {
     Map<String, Object> prepPropertiesInfo = new HashMap();
 
-    String uri = "thrift://" + getMyIp() + ":9083";
-    String defaultFS = "hdfs://" + "m15" + ":9000";
-    String warehouseDir = defaultFS + "/user/hive/warehouse2";
+    String uri = "thrift://localhost:9083";
+    String warehouseDir = "hdfs://localhost:9000/user/hive/warehouse2";
 
     prepPropertiesInfo.put("polaris.dataprep.spark.appName", "DiscoverySparkEngine");
     prepPropertiesInfo.put("polaris.dataprep.spark.master", "local");
     prepPropertiesInfo.put("polaris.storage.stagedb.metastore.uri", uri);
     prepPropertiesInfo.put("polaris.dataprep.spark.warehouseDir", warehouseDir);
-    prepPropertiesInfo.put("polaris.dataprep.spark.defaultFS", defaultFS);
 
     return prepPropertiesInfo;
   }

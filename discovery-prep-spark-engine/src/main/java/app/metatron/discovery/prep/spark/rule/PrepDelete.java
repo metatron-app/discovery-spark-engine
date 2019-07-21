@@ -14,7 +14,7 @@ public class PrepDelete extends PrepRule {
     Delete delete = (Delete) rule;
     Expression row = delete.getRow();
 
-    SparkUtil.createView(df, "temp");
+    SparkUtil.createTempView(df, "temp");
 
     String sql = "SELECT * FROM temp WHERE NOT (" + asSparkExpr(row.toString()) + ")";
     return SparkUtil.getSession().sql(sql);

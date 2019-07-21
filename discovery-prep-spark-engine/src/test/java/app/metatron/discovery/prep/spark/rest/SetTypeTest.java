@@ -16,7 +16,7 @@ public class SetTypeTest {
         "rename col: `Population_`, `Murder_`, `Forcible_Rape_`, `Robbery_`, `Aggravated_Assault_`, `Burglary_`, `Larceny_Theft_`, `Vehicle_Theft_` to: `Population`, `Murder`, `Forcible_Rape`, `Robbery`, `Aggravated_Assault`, `Burglary`, `Larceny_Theft`, `Vehicle_Theft`");
     ruleStrings.add("settype col: `Population` type: Long");
 
-    String dsUri = "/tmp/dataprep/uploads/crime.csv";
+    String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
@@ -29,7 +29,7 @@ public class SetTypeTest {
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("settype col: `sale_price` type: Double");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
@@ -43,7 +43,7 @@ public class SetTypeTest {
     ruleStrings
         .add("settype col: `contract_date` type: Timestamp format: 'yyyy-MM-dd\'T\'HH:mm:ssz'");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
@@ -57,7 +57,7 @@ public class SetTypeTest {
     ruleStrings
         .add("settype col: `contract_date` type: Timestamp format: 'yyyy-MM-dd\'T\'HH:mm:ssz'");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
@@ -72,7 +72,7 @@ public class SetTypeTest {
         .add("settype col: `contract_date` type: Timestamp format: 'yyyy-MM-dd\'T\'HH:mm:ssz'");
     ruleStrings.add("settype col: `contract_date` type: String format: 'yyyy/MM/dd'");
 
-    String dsUri = "/tmp/dataprep/uploads/sales_named.csv";
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
