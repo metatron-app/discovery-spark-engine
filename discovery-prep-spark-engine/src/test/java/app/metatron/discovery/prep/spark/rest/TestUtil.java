@@ -57,10 +57,10 @@ public class TestUtil {
     String uri = "thrift://localhost:9083";
     String warehouseDir = "hdfs://localhost:9000/user/hive/warehouse2";
 
+    prepPropertiesInfo.put("polaris.storage.stagedb.metastore.uri", uri);
     prepPropertiesInfo.put("polaris.dataprep.etl.spark.appName", "DiscoverySparkEngine");
     prepPropertiesInfo.put("polaris.dataprep.etl.spark.master", "local");
-    prepPropertiesInfo.put("polaris.storage.stagedb.metastore.uri", uri);
-    prepPropertiesInfo.put("polaris.dataprep.spark.warehouseDir", warehouseDir);
+    prepPropertiesInfo.put("polaris.dataprep.etl.spark.warehouseDir", warehouseDir);
 
     return prepPropertiesInfo;
   }
@@ -88,12 +88,12 @@ public class TestUtil {
     return datasetInfo;
   }
 
-  static Map<String, Object> buildSnapshotInfo(String absPath, String format) {
+  static Map<String, Object> buildSnapshotInfo(String absPath) {
     Map<String, Object> snapshotInfo = new HashMap();
 
-    snapshotInfo.put("storedUri", absPath);
+    snapshotInfo.put("ssId", "TestUtil");
     snapshotInfo.put("ssType", "URI");
-    snapshotInfo.put("format", format);
+    snapshotInfo.put("storedUri", absPath);
 
     return snapshotInfo;
   }
@@ -101,6 +101,7 @@ public class TestUtil {
   static Map<String, Object> buildSnapshotInfo(StagingDbSnapshotInfo hiveSnapshotInfo) {
     Map<String, Object> snapshotInfo = new HashMap();
 
+    snapshotInfo.put("ssId", "TestUtil");
     snapshotInfo.put("ssType", "STAGING_DB");
     snapshotInfo.put("dbName", hiveSnapshotInfo.tableInfo.dbName);
     snapshotInfo.put("tblName", hiveSnapshotInfo.tableInfo.tblName);
@@ -111,9 +112,8 @@ public class TestUtil {
   static Map<String, Object> buildCallbackInfo() {
     Map<String, Object> callbackInfo = new HashMap();
 
-    callbackInfo.put("port", 8180);
-    callbackInfo.put("oauthToken",
-        "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1MzYyNTY4NTEsInVzZXJfbmFtZSI6InBvbGFyaXMiLCJhdXRob3JpdGllcyI6WyJQRVJNX1NZU1RFTV9NQU5BR0VfU0hBUkVEX1dPUktTUEFDRSIsIl9fU0hBUkVEX1VTRVIiLCJQRVJNX1NZU1RFTV9NQU5BR0VfREFUQVNPVVJDRSIsIlBFUk1fU1lTVEVNX01BTkFHRV9QUklWQVRFX1dPUktTUEFDRSIsIlBFUk1fU1lTVEVNX1ZJRVdfV09SS1NQQUNFIiwiX19EQVRBX01BTkFHRVIiLCJfX1BSSVZBVEVfVVNFUiJdLCJqdGkiOiI3MzYxZjU2MS00MjVmLTQzM2ItOGYxZC01Y2RmOTlhM2RkMWIiLCJjbGllbnRfaWQiOiJwb2xhcmlzX2NsaWVudCIsInNjb3BlIjpbIndyaXRlIl19.iig9SBPrNUXoHp2wxGgZczfwt71fu3RBuRc14HxYxvg");
+    callbackInfo.put("port", "0");
+    callbackInfo.put("oauthToken", "fake");
 
     return callbackInfo;
   }
@@ -123,7 +123,7 @@ public class TestUtil {
 
     args.put("prepProperties", buildPrepPropertiesInfo());
     args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(ssUri, "CSV"));
+    args.put("snapshotInfo", buildSnapshotInfo(ssUri));
     args.put("callbackInfo", buildCallbackInfo());
 
     Response response = given().contentType(ContentType.JSON)
@@ -148,7 +148,7 @@ public class TestUtil {
 
     args.put("prepProperties", buildPrepPropertiesInfo());
     args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(ssUri, "CSV"));
+    args.put("snapshotInfo", buildSnapshotInfo(ssUri));
     args.put("callbackInfo", buildCallbackInfo());
 
     URL url = new URL(BASE_URL + "/run");
@@ -188,7 +188,7 @@ public class TestUtil {
 
     args.put("prepProperties", buildPrepPropertiesInfo());
     args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(ssUri, "JSON"));
+    args.put("snapshotInfo", buildSnapshotInfo(ssUri));
     args.put("callbackInfo", buildCallbackInfo());
 
     Response response = given().contentType(ContentType.JSON)
