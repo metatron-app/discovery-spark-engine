@@ -1,5 +1,6 @@
 package app.metatron.discovery.prep.spark.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -23,6 +24,18 @@ public class BasicTest {
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
     TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+  }
+
+  @Test
+  public void testRenameHttpURLConnection() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("rename col: _c0 to: new_colname");
+
+    String dsUri = TestUtil.getResourcePath("csv/crime.csv");
+    String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
+
+    TestUtil.testFileToCsvHttpURLConnection(dsUri, ruleStrings, ssUri);
   }
 
   @Test

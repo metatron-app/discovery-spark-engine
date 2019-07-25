@@ -3,15 +3,16 @@ package app.metatron.discovery.prep.spark.rest;
 import static com.jayway.restassured.RestAssured.given;
 import static org.testng.Assert.assertEquals;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
+import java.io.BufferedReader;
 import java.io.File;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -139,6 +140,47 @@ public class TestUtil {
     assertEquals(response.path("result"), "SUCCEEDED");
 
     System.out.println(response.toString());
+  }
+
+  static void testFileToCsvHttpURLConnection(String dsUri, List<String> ruleStrings, String ssUri)
+      throws IOException {
+    Map<String, Object> args = new HashMap();
+
+    args.put("prepProperties", buildPrepPropertiesInfo());
+    args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
+    args.put("snapshotInfo", buildSnapshotInfo(ssUri, "CSV"));
+    args.put("callbackInfo", buildCallbackInfo());
+
+    URL url = new URL(BASE_URL + "/run");
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+    con.setRequestMethod("POST");
+    con.setRequestProperty("Content-Type", "application/json; utf-8");
+    con.setRequestProperty("Accept", "application/json");
+    con.setDoOutput(true);
+
+    ObjectMapper mapper = new ObjectMapper();
+    String jsonArgs = mapper.writeValueAsString(args);
+
+    try (OutputStream os = con.getOutputStream()) {
+      byte[] input = jsonArgs.getBytes("utf-8");
+      os.write(input, 0, input.length);
+    }
+
+    InputStreamReader reader = new InputStreamReader(con.getInputStream(), "utf-8");
+    try (BufferedReader br = new BufferedReader(reader)) {
+      StringBuilder response = new StringBuilder();
+      String responseLine = null;
+
+      while (true) {
+        responseLine = br.readLine();
+        if (responseLine == null) {
+          break;
+        }
+        response.append(responseLine.trim());
+      }
+      System.out.println(response.toString());
+    }
   }
 
   static void testFileToJson(String dsUri, List<String> ruleStrings, String ssUri) {
