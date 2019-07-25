@@ -57,8 +57,8 @@ public class TestUtil {
     String uri = "thrift://localhost:9083";
     String warehouseDir = "hdfs://localhost:9000/user/hive/warehouse2";
 
-    prepPropertiesInfo.put("polaris.dataprep.spark.appName", "DiscoverySparkEngine");
-    prepPropertiesInfo.put("polaris.dataprep.spark.master", "local");
+    prepPropertiesInfo.put("polaris.dataprep.etl.spark.appName", "DiscoverySparkEngine");
+    prepPropertiesInfo.put("polaris.dataprep.etl.spark.master", "local");
     prepPropertiesInfo.put("polaris.storage.stagedb.metastore.uri", uri);
     prepPropertiesInfo.put("polaris.dataprep.spark.warehouseDir", warehouseDir);
 
@@ -92,7 +92,7 @@ public class TestUtil {
     Map<String, Object> snapshotInfo = new HashMap();
 
     snapshotInfo.put("storedUri", absPath);
-    snapshotInfo.put("ssType", "LOCAL");
+    snapshotInfo.put("ssType", "URI");
     snapshotInfo.put("format", format);
 
     return snapshotInfo;

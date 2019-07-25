@@ -90,8 +90,8 @@ public class DiscoveryPrepSparkEngineService {
     Map<String, Object> snapshotInfo = (Map<String, Object>) args.get("snapshotInfo");
     Map<String, Object> callbackInfo = (Map<String, Object>) args.get("callbackInfo");
 
-    String appName = (String) prepProperties.get("polaris.dataprep.spark.appName");
-    String masterUri = (String) prepProperties.get("polaris.dataprep.spark.master");
+    String appName = (String) prepProperties.get("polaris.dataprep.etl.spark.appName");
+    String masterUri = (String) prepProperties.get("polaris.dataprep.etl.spark.master");
     String metastoreUris = (String) prepProperties.get("polaris.storage.stagedb.metastore.uri");
     String warehouseDir = (String) prepProperties.get("polaris.dataprep.spark.warehouseDir");
 
@@ -99,7 +99,7 @@ public class DiscoveryPrepSparkEngineService {
 
     String ssType = (String) snapshotInfo.get("ssType");
     String ssUri = (String) snapshotInfo.get("storedUri");
-    String ssFormat = (String) snapshotInfo.get("format");
+    String ssUriFormat = ssUri.endsWith(".json") ? "JSON" : "CSV";
     String dbName = (String) snapshotInfo.get("dbName");
     String tblName = (String) snapshotInfo.get("tblName");
 
@@ -123,7 +123,7 @@ public class DiscoveryPrepSparkEngineService {
 
     // Write as snapshot
     switch (ssType) {
-      case "LOCAL":
+      case "URI":
         URI uri = new URI(ssUri);
         if (uri.getScheme() == null) {
           ssUri = "file://" + ssUri;
@@ -132,7 +132,7 @@ public class DiscoveryPrepSparkEngineService {
 
         switch (uri.getScheme()) {
           case "file":
-            if (ssFormat.equals("JSON")) {
+            if (ssUriFormat.equals("JSON")) {
               JsonUtil.writeJson(df, ssUri, null);
             } else {
               CsvUtil.writeCsv(df, ssUri, null);
@@ -143,7 +143,7 @@ public class DiscoveryPrepSparkEngineService {
             Configuration conf = new Configuration();
             conf.addResource(new Path(System.getenv("HADOOP_CONF_DIR") + "/core-site.xml"));
 
-            if (ssFormat.equals("JSON")) {
+            if (ssUriFormat.equals("JSON")) {
               JsonUtil.writeJson(df, ssUri, conf);
             } else {
               CsvUtil.writeCsv(df, ssUri, conf);
