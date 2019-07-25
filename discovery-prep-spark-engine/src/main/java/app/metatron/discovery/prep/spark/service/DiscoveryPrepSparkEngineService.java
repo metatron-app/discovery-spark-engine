@@ -169,6 +169,7 @@ public class DiscoveryPrepSparkEngineService {
     try {
       // Load dataset
       Dataset<Row> df = createStage0(datasetInfo);
+      long totalLines = 0L;
 
       // Transform dataset
       PrepTransformer transformer = new PrepTransformer();
@@ -191,9 +192,9 @@ public class DiscoveryPrepSparkEngineService {
               callback.updateAsWriting(ssId);
 
               if (ssUriFormat.equals("JSON")) {
-                JsonUtil.writeJson(df, ssUri, null);
+                totalLines = JsonUtil.writeJson(df, ssUri, null);
               } else {
-                CsvUtil.writeCsv(df, ssUri, null);
+                totalLines = CsvUtil.writeCsv(df, ssUri, null);
               }
               break;
 
@@ -204,9 +205,9 @@ public class DiscoveryPrepSparkEngineService {
               callback.updateAsWriting(ssId);
 
               if (ssUriFormat.equals("JSON")) {
-                JsonUtil.writeJson(df, ssUri, conf);
+                totalLines = JsonUtil.writeJson(df, ssUri, conf);
               } else {
-                CsvUtil.writeCsv(df, ssUri, conf);
+                totalLines = CsvUtil.writeCsv(df, ssUri, conf);
               }
               break;
 
@@ -221,11 +222,15 @@ public class DiscoveryPrepSparkEngineService {
 
           callback.updateAsTableCreating(ssId);
           SparkUtil.createTable(df, dbName, tblName);
+          totalLines = df.count();
           break;
 
         default:
           throw new IOException("Wrong ssType: " + ssType);
       }
+
+      callback.updateSnapshot("totalLines", String.valueOf(totalLines), ssId);
+
     } catch (CancellationException ce) {
       LOGGER.info("run(): snapshot canceled from run_internal(): ", ce);
       callback.updateSnapshot("finishTime", DateTime.now().toString(), ssId);
@@ -253,8 +258,6 @@ public class DiscoveryPrepSparkEngineService {
     }
 
     callback.updateSnapshot("custom", "Not implemented in spark engine", ssId);   // colDescs
-    callback.updateSnapshot("totalLines", "Not implemented in spark engine", ssId);
-
     callback.updateSnapshot("finishTime", DateTime.now().toString(), ssId);
     callback.updateAsSucceeded(ssId);
   }

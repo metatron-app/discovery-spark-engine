@@ -187,9 +187,10 @@ public class CsvUtil {
     return printer;
   }
 
-  public static void writeCsv(Dataset<Row> df, String strUri, Configuration conf)
+  public static long writeCsv(Dataset<Row> df, String strUri, Configuration conf)
       throws IOException, URISyntaxException {
     CSVPrinter printer = getPrinter(strUri, conf);
+    long totalLines = 0L;
 
     String[] colNames = df.columns();
 
@@ -207,50 +208,10 @@ public class CsvUtil {
         printer.print(row.get(i));
       }
       printer.println();
+      totalLines++;
     }
+
     printer.close(true);
-  }
-
-  public static void writeHiveTableAsCSV(ResultSet rs, ServletOutputStream outputStream,
-      String dbName) {
-    try {
-      ResultSetMetaData rsmd = rs.getMetaData();
-      int columnCount = rsmd.getColumnCount();
-      StringBuffer sb = new StringBuffer();
-      for (int columnIdx = 1; columnIdx <= columnCount; columnIdx++) {
-        String colName = rsmd.getColumnName(columnIdx);
-        if (colName.startsWith(dbName + ".")) {
-          colName = colName.substring(dbName.length() + 1);
-        }
-        //int colType = rsmd.getColumnType(columnIdx);
-        if (1 < columnIdx) {
-          sb.append(",");
-        }
-        sb.append(escapeCsvField(colName));
-      }
-      outputStream.write(sb.toString().getBytes());
-      while (rs.next()) {
-        sb = new StringBuffer();
-        sb.append("\n");
-        for (int columnIdx = 1; columnIdx <= columnCount; columnIdx++) {
-          String columnValue = rs.getString(columnIdx);
-          if (1 < columnIdx) {
-            sb.append(",");
-          }
-          sb.append(escapeCsvField(columnValue));
-        }
-        outputStream.write(sb.toString().getBytes());
-      }
-    } catch (Exception e) {
-      LOGGER.error("Failed to write hive table as CSV file : {}", e.getMessage());
-    }
-  }
-
-  private static String escapeCsvField(String value) {
-    if (value.contains("\"") || value.contains(",")) {
-      value = value.replaceAll("\"", "\\\"");
-      return "\"" + value + "\"";
-    }
-    return value;
+    return totalLines;
   }
 }
