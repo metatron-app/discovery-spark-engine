@@ -37,7 +37,7 @@ public class PrepDerive extends PrepRule {
       sql = sql + colName + ", ";
 
       if (i == lastRelatedColno) {
-        sql = String.format("%s%s AS %s, ", sql, strExpr, as);
+        sql = String.format("%s%s AS `%s`, ", sql, strExpr, as);
       }
     }
     sql = sql.substring(0, sql.length() - 2) + " FROM temp";

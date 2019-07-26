@@ -42,12 +42,12 @@ public class PrepReplace extends PrepRule {
       }
 
       if (on instanceof RegularExpr) {
-        sql = String.format("%sregexp_replace(%s, '%s', %s) AS %s, ", sql, colName, pattern, with, colName);
+        sql = String.format("%sregexp_replace(`%s`, '%s', %s) AS `%s`, ", sql, colName, pattern, with, colName);
       } else {
         if (pattern.startsWith("'") && pattern.endsWith(("'"))) {
           pattern = pattern.substring(1, pattern.length() - 1);
         }
-        sql = String.format("%sreplace(%s, '%s', %s) AS %s, ", sql, colName, pattern, with, colName);
+        sql = String.format("%sreplace(`%s`, '%s', %s) AS `%s`, ", sql, colName, pattern, with, colName);
       }
     }
     sql = sql.substring(0, sql.length() - 2) + " FROM temp";

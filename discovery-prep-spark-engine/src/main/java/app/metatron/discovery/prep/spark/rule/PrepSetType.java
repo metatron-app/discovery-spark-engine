@@ -29,7 +29,7 @@ public class PrepSetType extends PrepRule {
       String colName = colNames[i];
 
       if (!targetColNames.contains(colName)) {
-        sql = sql + colName + ", ";
+        sql = sql + "`" + colName + "`, ";
         continue;
       }
 
@@ -38,17 +38,17 @@ public class PrepSetType extends PrepRule {
       switch (toType) {
         case "timestamp":
           sql = String
-              .format("%sCAST(UNIX_TIMESTAMP(%s, '%s') AS TIMESTAMP) AS %s, ", sql, colName, format,
+              .format("%sCAST(UNIX_TIMESTAMP(`%s`, '%s') AS TIMESTAMP) AS `%s`, ", sql, colName, format,
                   colName);
           break;
         case "string":
           if (fromType.equalsIgnoreCase("timestamp")) {
             sql = String
-                .format("%sFROM_UNIXTIME(UNIX_TIMESTAMP(%s), '%s') AS %s, ", sql, colName, format,
+                .format("%sFROM_UNIXTIME(UNIX_TIMESTAMP(`%s`), '%s') AS `%s`, ", sql, colName, format,
                     colName);
           }
         default:
-          sql = String.format("%sCAST(%s AS %s) AS %s, ", sql, colName, toType, colName);
+          sql = String.format("%sCAST(`%s` AS %s) AS `%s`, ", sql, colName, toType, colName);
           break;
       }
     }
