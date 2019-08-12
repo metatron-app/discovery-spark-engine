@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package app.metatron.discovery.prep.spark.util;
 
 import java.io.File;
@@ -43,53 +57,6 @@ public class CsvUtil {
 
     return writer;
   }
-
-  /**
-   * @param strUri URI as String (to be java.net.URI)
-   *
-   * header will be false for table-type snapshots.
-   */
-//  public static CSVPrinter getPrinter(String strUri) {
-//    Writer writer;
-//    URI uri = null;
-//
-//    LOGGER.debug("CsvUtil.getPrinter(): strUri={}", strUri);
-//
-//    try {
-//      uri = new URI(strUri);
-//    } catch (URISyntaxException e) {
-//      e.printStackTrace();
-//    }
-//
-//    assert uri.getScheme().equals("file") : uri;  // HDFS snapshots will be written by Spark itself.
-//
-//    File file = new File(uri);
-//    File dirParent = file.getParentFile();
-//    assert dirParent != null : uri;
-//
-//    if (!dirParent.exists()) {
-//      dirParent.mkdirs();
-//    }
-//
-//    FileOutputStream fos = null;
-//    try {
-//      fos = new FileOutputStream(file);
-//    } catch (FileNotFoundException e) {
-//      e.printStackTrace();
-//    }
-//
-//    writer = getWriter(fos);
-//
-//    CSVPrinter printer = null;
-//    try {
-//      printer = new CSVPrinter(writer, CSVFormat.RFC4180.withQuoteMode(QuoteMode.ALL_NON_NULL));
-//    } catch (IOException e) {
-//      e.printStackTrace();
-//    }
-//
-//    assert printer != null;
-//    return printer;
-//  }
 
   /**
    * @param strUri URI as String (to be java.net.URI)
