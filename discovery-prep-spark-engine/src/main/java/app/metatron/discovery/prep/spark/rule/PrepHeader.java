@@ -27,7 +27,7 @@ public class PrepHeader extends PrepRule {
       if (row.get(i) != null) {
         newColName = row.get(i).toString();
       } else {
-        newColName = "_c" + i;
+        newColName = "column" + (i + 1);
       }
       newDf = newDf.withColumnRenamed(colNames[i], newColName);
     }

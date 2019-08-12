@@ -1,5 +1,6 @@
 package app.metatron.discovery.prep.spark.util;
 
+import java.net.URI;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -28,6 +29,7 @@ public class SparkUtil {
             .config("spark.sql.warehouse.dir", warehouseDir)
             .config("spark.sql.catalogImplementation", "hive")
             .config("hive.metastore.uris", metastoreUris)
+            .config("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation", "true")
             .enableHiveSupport();
       }
       session = builder.getOrCreate();
@@ -47,20 +49,24 @@ public class SparkUtil {
     df.createOrReplaceTempView(tempViewName);
   }
 
-  public static void prepareCreateTable(Dataset<Row> df, String fullName) throws AnalysisException {
+  private void deleteUri(URI uri) {
+  }
+
+  public static void prepareCreateTable(Dataset<Row> df, String dbName, String tblName)
+      throws AnalysisException {
     createTempView(df, "temp");
-    getSession().sql(String.format("DROP TABLE %s PURGE", fullName));
+    getSession().sql(String.format("DROP TABLE %s PURGE", dbName + "." + tblName));
   }
 
   public static void createTable(Dataset<Row> df, String dbName, String tblName) {
-    String fullName = dbName + "." + tblName;
     try {
-      prepareCreateTable(df, fullName);
+      prepareCreateTable(df, dbName, tblName);
     } catch (AnalysisException e) {
       // NOTE:
       // This is a trick to catch "table not found" exception from DROP TABLE statement
       // The compiler knows DROP TABLE does not throw AnalysisException. (Why?)
     }
+    String fullName = dbName + "." + tblName;
     getSession().sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", fullName, "temp"));
   }
 
