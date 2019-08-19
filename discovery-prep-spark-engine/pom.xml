@@ -35,6 +35,11 @@
     <javas.version>1.8</javas.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+    <!--We need jackson version >= 2.9.9.2 because of security vulnerability-->
+    <!--Also need < 3.0 because Spark module demands-->
+    <jackson.version>2.9.9</jackson.version>
+
   </properties>
 
   <artifactId>discovery-prep-spark-engine</artifactId>
@@ -60,14 +65,18 @@
   <dependencies>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>[2.9.9.2,)</version>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>[2.9.9.2,)</version>
-      <!--We need >= 2.9.9.2 because of security vulnerability-->
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-beanutils</groupId>
