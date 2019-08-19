@@ -98,16 +98,15 @@ public class DiscoveryPrepSparkEngineService {
         Integer columnCount = (Integer) datasetInfo.get("manualColumnCount");
         String extensionType = FilenameUtils.getExtension(storedUri);
 
+        // If not .json, treat as a CSV.
         switch (extensionType.toUpperCase()) {
-          case "CSV":
-            String delimiter = (String) datasetInfo.get("delimiter");
-            return SparkUtil.getSession().read().format("CSV").option("delimiter", delimiter)
-                .option("header", removeUnusedRules(ruleStrings)).load(storedUri);
           case "JSON":
             StructType schema = JsonUtil.getSchemaFromJson(storedUri);
             return SparkUtil.getSession().read().schema(schema).json(storedUri);
           default:
-            throw new IOException("Wrong extensionType: " + extensionType);
+            String delimiter = (String) datasetInfo.get("delimiter");
+            return SparkUtil.getSession().read().format("CSV").option("delimiter", delimiter)
+                .option("header", removeUnusedRules(ruleStrings)).load(storedUri);
         }
 
       case "STAGING_DB":
