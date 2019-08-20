@@ -31,7 +31,7 @@ public class PrepRename extends PrepRule {
     Expression to = rename.getTo();
 
     List<String> colNames = getIdentifierList(col);
-    List<String> toNames = getIdentifierList(to);
+    List<String> toNames = getStringList(to);
 
     for (int i = 0; i < colNames.size(); i++) {
       newDf = newDf.withColumnRenamed(colNames.get(i), toNames.get(i));

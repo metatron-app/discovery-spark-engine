@@ -15,6 +15,7 @@
 package app.metatron.discovery.prep.spark.rule;
 
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Constant.ArrayExpr;
+import app.metatron.discovery.prep.parser.preparation.rule.expr.Constant.StringExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expr.BinaryNumericOpExprBase;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expr.FunctionArrayExpr;
@@ -28,6 +29,7 @@ import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier.Ident
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 public class PrepRule {
 
@@ -46,6 +48,23 @@ public class PrepRule {
       relatedColNames.add(colName);
     } else {
       for (String colName : ((IdentifierArrayExpr) expr).getValue()) {
+        arr.add(colName);
+        relatedColNames.add(colName);
+      }
+    }
+    return arr;
+  }
+
+  public List<String> getStringList(Expression expr) {
+    List<String> arr = new ArrayList();
+
+    if (expr instanceof StringExpr) {
+      String colName = expr.toString();
+      arr.add(colName);
+      relatedColNames.add(colName);
+    } else {
+      for (Object obj : ((ArrayExpr) expr).getValue()) {
+        String colName = StringUtils.strip((String) obj, "'");
         arr.add(colName);
         relatedColNames.add(colName);
       }
