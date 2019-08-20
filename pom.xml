@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>app.metatron.discovery</groupId>
-  <artifactId>discovery-spark-server</artifactId>
+  <artifactId>discovery-spark-engine</artifactId>
   <packaging>pom</packaging>
   <version>3.3.0-rc1</version>
 
