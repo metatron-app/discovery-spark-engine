@@ -58,6 +58,8 @@ public class PrepTransformer {
       case "settype":
         return (new PrepSetType()).transform(df, rule);
       case "set":
+        // Cause SparkSQL always needs a timestamp format, we use "format" field of "set". (Embedded engine doesn't use)
+        rule = parser.parse(ruleString.replace("'T'", "\\\'T\\\'"));
         return (new PrepSet()).transform(df, rule);
       case "derive":
         return (new PrepDerive()).transform(df, rule);
