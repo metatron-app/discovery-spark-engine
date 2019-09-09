@@ -18,13 +18,14 @@
 # under the License.
 
 if [ "$1" == "-h" ]; then
-  echo "Usage: `basename $0` [<jar_filename>] [<listen_port>]"
+  echo "Usage: `basename $0` [<application.yaml path>]"
   exit 0
 fi
 
+# Test mode
 if [ "$1" == "-t" ]; then
   JAR=discovery-prep-spark-engine/target/discovery-prep-spark-engine-1.2.0.jar
-  PORT=2586
+  PORT=5300
   java -jar $JAR --server.port=$PORT
   exit 0
 fi
@@ -63,6 +64,7 @@ echo -e "${WHITE}Finding discovery's configuration... ${WHITE}${CONF_YAML}"
 
 if [ ! -f "$CONF_YAML" ]; then
   echo -e "${RED}Config file not found: ${CONF_YAML}"
+  echo -e "${NC}"
   exit -1
 fi
 
