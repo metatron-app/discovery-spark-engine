@@ -30,8 +30,12 @@ import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PrepTransformer {
+
+  private static Logger LOGGER = LoggerFactory.getLogger(PrepTransformer.class);
 
   SparkSession session;
   RuleVisitorParser parser;
@@ -67,7 +71,7 @@ public class PrepTransformer {
         return (new PrepReplace()).transform(df, rule);
     }
 
-    assert false : ruleString;
-    return null;
+    LOGGER.error("Unsupported rule: " + ruleString);
+    throw new IllegalArgumentException("Unsupported rule: " + rule.getName());
   }
 }
