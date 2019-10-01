@@ -1,0 +1,1 @@
+Copy conf/application-config.yaml to $METATRON_HOME/conf before exec run-prep-spark-engine.sh.
