@@ -76,6 +76,7 @@ CONF_KEY_JAR="polaris.dataprep.etl.spark.jar"
 JAR=`parse_yaml $CONF_YAML | grep ${CONF_KEY_JAR} | cut -d= -f2 | envsubst`
 if [ -z "$JAR" ]; then
   echo -e "${GREEN}${CONF_KEY_JAR}: ${RED}Not configured"
+  echo -e "${NC}"
   exit -1
 fi
 echo -e "${GREEN}${CONF_KEY_JAR}: ${CYAN}${JAR}"
@@ -86,6 +87,7 @@ CONF_KEY_PORT="polaris.dataprep.etl.spark.port"
 PORT=`parse_yaml $CONF_YAML | grep ${CONF_KEY_PORT} | cut -d= -f2 | envsubst`
 if [ -z "$PORT" ]; then
   echo -e "${GREEN}${CONF_KEY_PORT}: ${RED}Not configured"
+  echo -e "${NC}"
   exit -1
 fi
 echo -e "${GREEN}${CONF_KEY_PORT}: ${CYAN}${PORT}"
