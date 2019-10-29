@@ -20,8 +20,12 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.SparkSession.Builder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SparkUtil {
+
+  private static Logger LOGGER = LoggerFactory.getLogger(SparkUtil.class);
 
   private static SparkSession session;
 
@@ -32,19 +36,24 @@ public class SparkUtil {
 
   public static SparkSession getSession() {
     if (session == null) {
+      LOGGER.info("session == null: creating session");
+      LOGGER.info("appName={} masterUri={} spark.sql.warehouse.dir={}", appName, masterUri, warehouseDir);
+      LOGGER.info("spark.sql.catalogImplementation={} hive.metastore.uris={}", "hive", metastoreUris);
+      LOGGER.info("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation={}", "true");
+
       Builder builder = SparkSession.builder()
-          .appName(appName)
-          .master(masterUri);
+              .appName(appName)
+              .master(masterUri);
 
       if (metastoreUris != null) {
         assert warehouseDir != null : metastoreUris;
 
         builder = builder
-            .config("spark.sql.warehouse.dir", warehouseDir)
-            .config("spark.sql.catalogImplementation", "hive")
-            .config("hive.metastore.uris", metastoreUris)
-            .config("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation", "true")
-            .enableHiveSupport();
+                .config("spark.sql.warehouse.dir", warehouseDir)
+                .config("spark.sql.catalogImplementation", "hive")
+                .config("hive.metastore.uris", metastoreUris)
+                .config("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation", "true")
+                .enableHiveSupport();
       }
       session = builder.getOrCreate();
     }
@@ -66,8 +75,7 @@ public class SparkUtil {
   private void deleteUri(URI uri) {
   }
 
-  public static void prepareCreateTable(Dataset<Row> df, String dbName, String tblName)
-      throws AnalysisException {
+  public static void prepareCreateTable(Dataset<Row> df, String dbName, String tblName) throws AnalysisException {
     createTempView(df, "temp");
     getSession().sql(String.format("DROP TABLE %s PURGE", dbName + "." + tblName));
   }
@@ -76,9 +84,7 @@ public class SparkUtil {
     try {
       prepareCreateTable(df, dbName, tblName);
     } catch (AnalysisException e) {
-      // NOTE:
-      // This is a trick to catch "table not found" exception from DROP TABLE statement
-      // The compiler knows DROP TABLE does not throw AnalysisException. (Why?)
+      // Suppress table not found
     }
     String fullName = dbName + "." + tblName;
     getSession().sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", fullName, "temp"));
