@@ -277,7 +277,7 @@ public class DiscoveryPrepSparkEngineService {
       callback.updateAsFailed(ssId);
       LOGGER.info("run(): result=FAILED finishTime={}", finishTime);
 
-      StringBuffer sb = new StringBuffer();
+      StringBuffer sb = new StringBuffer(e.getMessage());
 
       for (StackTraceElement ste : e.getStackTrace()) {
         sb.append("\n");
