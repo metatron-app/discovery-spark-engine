@@ -204,7 +204,7 @@ public class DiscoveryPrepSparkEngineService {
     try {
       // Load dataset
       Dataset<Row> df = createStage0(datasetInfo);
-      long totalLines = 0L;
+      long totalLines;
 
       // Transform dataset
       PrepTransformer transformer = new PrepTransformer();

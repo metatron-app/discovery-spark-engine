@@ -51,14 +51,14 @@ public class TestUtil {
 
   static void testPing() {
     Response response = given().contentType(ContentType.JSON)
-        .accept(ContentType.JSON)
-        .when()
-        .post(BASE_URL + "/ping")
-        .then()
-        .log().all()
-        .statusCode(HttpStatus.SC_OK)
-        .extract()
-        .response();
+            .accept(ContentType.JSON)
+            .when()
+            .post(BASE_URL + "/ping")
+            .then()
+            .log().all()
+            .statusCode(HttpStatus.SC_OK)
+            .extract()
+            .response();
 
     assertEquals(response.path("result"), "SUCCEEDED");
 
@@ -80,7 +80,7 @@ public class TestUtil {
   }
 
   static Map<String, Object> buildDatasetInfo(String ssUri, String delimiter,
-      List<String> ruleStrings) {
+          List<String> ruleStrings) {
     Map<String, Object> datasetInfo = new HashMap();
 
     datasetInfo.put("importType", "URI");
@@ -141,23 +141,24 @@ public class TestUtil {
     args.put("callbackInfo", buildCallbackInfo());
 
     Response response = given().contentType(ContentType.JSON)
-        .accept(ContentType.JSON)
-        .when()
-        .content(args)
-        .post(BASE_URL + "/run")
-        .then()
-        .log().all()
-        .statusCode(HttpStatus.SC_OK)
-        .extract()
-        .response();
+            .accept(ContentType.JSON)
+            .when()
+            .content(args)
+            .post(BASE_URL + "/run")
+            .then()
+            .log().all()
+            .statusCode(HttpStatus.SC_OK)
+            .extract()
+            .response();
 
     assertEquals(response.path("result"), "SUCCEEDED");
 
     System.out.println(response.toString());
   }
 
-  static void testFileToCsvHttpURLConnection(String dsUri, List<String> ruleStrings, String ssUri)
-      throws IOException {
+  // This is a test for real use of the API of prep-spark-engine,
+  // because the actual call method is a common HTTP POST request, not REST Assured test suite.
+  static void testFileToCsvHttpURLConnection(String dsUri, List<String> ruleStrings, String ssUri) throws IOException {
     Map<String, Object> args = new HashMap();
 
     args.put("prepProperties", buildPrepPropertiesInfo());
@@ -184,7 +185,7 @@ public class TestUtil {
     InputStreamReader reader = new InputStreamReader(con.getInputStream(), "utf-8");
     try (BufferedReader br = new BufferedReader(reader)) {
       StringBuilder response = new StringBuilder();
-      String responseLine = null;
+      String responseLine;
 
       while (true) {
         responseLine = br.readLine();
@@ -193,7 +194,11 @@ public class TestUtil {
         }
         response.append(responseLine.trim());
       }
+
       System.out.println(response.toString());
+
+      Map<String, Object> responseMap = mapper.readValue(response.toString(), HashMap.class);
+      assertEquals((String) responseMap.get("result"), "SUCCEEDED");
     }
   }
 
@@ -206,15 +211,15 @@ public class TestUtil {
     args.put("callbackInfo", buildCallbackInfo());
 
     Response response = given().contentType(ContentType.JSON)
-        .accept(ContentType.JSON)
-        .when()
-        .content(args)
-        .post(BASE_URL + "/run")
-        .then()
-        .log().all()
-        .statusCode(HttpStatus.SC_OK)
-        .extract()
-        .response();
+            .accept(ContentType.JSON)
+            .when()
+            .content(args)
+            .post(BASE_URL + "/run")
+            .then()
+            .log().all()
+            .statusCode(HttpStatus.SC_OK)
+            .extract()
+            .response();
 
     assertEquals(response.path("result"), "SUCCEEDED");
 
@@ -250,7 +255,7 @@ public class TestUtil {
   }
 
   static void testFileToHive(String dsUri, List<String> ruleStrings,
-      StagingDbSnapshotInfo stagingDbSnapshotInfo) {
+          StagingDbSnapshotInfo stagingDbSnapshotInfo) {
     Map<String, Object> args = new HashMap();
 
     args.put("prepProperties", buildPrepPropertiesInfo());
@@ -259,15 +264,15 @@ public class TestUtil {
     args.put("callbackInfo", buildCallbackInfo());
 
     Response response = given().contentType(ContentType.JSON)
-        .accept(ContentType.JSON)
-        .when()
-        .content(args)
-        .post(BASE_URL + "/run")
-        .then()
-        .log().all()
-        .statusCode(HttpStatus.SC_OK)
-        .extract()
-        .response();
+            .accept(ContentType.JSON)
+            .when()
+            .content(args)
+            .post(BASE_URL + "/run")
+            .then()
+            .log().all()
+            .statusCode(HttpStatus.SC_OK)
+            .extract()
+            .response();
 
     assertEquals(response.path("result"), "SUCCEEDED");
 
@@ -275,7 +280,7 @@ public class TestUtil {
   }
 
   static void testHiveToHive(TableInfo tableInfo, List<String> ruleStrings,
-      StagingDbSnapshotInfo stagingDbSnapshotInfo) {
+          StagingDbSnapshotInfo stagingDbSnapshotInfo) {
     Map<String, Object> args = new HashMap();
 
     args.put("prepProperties", buildPrepPropertiesInfo());
@@ -284,15 +289,15 @@ public class TestUtil {
     args.put("callbackInfo", buildCallbackInfo());
 
     Response response = given().contentType(ContentType.JSON)
-        .accept(ContentType.JSON)
-        .when()
-        .content(args)
-        .post(BASE_URL + "/run")
-        .then()
-        .log().all()
-        .statusCode(HttpStatus.SC_OK)
-        .extract()
-        .response();
+            .accept(ContentType.JSON)
+            .when()
+            .content(args)
+            .post(BASE_URL + "/run")
+            .then()
+            .log().all()
+            .statusCode(HttpStatus.SC_OK)
+            .extract()
+            .response();
 
     assertEquals(response.path("result"), "SUCCEEDED");
 

@@ -25,7 +25,7 @@ public class JsonTest {
   public void testRename() {
     List<String> ruleStrings = new ArrayList();
 
-    ruleStrings.add("rename col: Date to: dt");
+    ruleStrings.add("rename col: Date to: 'dt'");
 
     // JSON -> CSV
     String dsUri = TestUtil.getResourcePath("json/crime.json");

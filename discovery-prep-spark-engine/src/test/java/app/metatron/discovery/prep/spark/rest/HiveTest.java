@@ -26,12 +26,17 @@ public class HiveTest {
 
   @BeforeClass    // All test-cases in this class depend on table "test_rename"
   public static void testRename() {
-    List<String> ruleStrings = new ArrayList();
-
-    ruleStrings.add("rename col: Date to: dt");
-
     // JSON -> Hive
     String dsUri = TestUtil.getResourcePath("json/crime.json");
+
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("rename col: `Date`, `Location`, `Population_`, `Total_Crime`, `Violent_Crime`, `Property_Crime`, "
+            + "`Murder_`, `Forcible_Rape_`, `Robbery_`, `Aggravated_Assault_`, `Burglary_`, `Larceny_Theft_`, "
+            + "`Vehicle_Theft_` "
+            + "to: 'dt', 'location', 'population', 'total_crime', 'violent_crime', 'property_crime', "
+            + "'murder', 'forcible_rape', 'robbery', 'aggravated_assault', 'burglary', 'larceny_theft', "
+            + "'vehicle_theft'");
 
     StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_rename");
 
@@ -42,10 +47,23 @@ public class HiveTest {
   public void testKeep() {
     List<String> ruleStrings = new ArrayList();
 
-    ruleStrings.add("keep row: `Location` == 'NY'");
+    ruleStrings.add("keep row: `location` == 'NY'");
 
     TableInfo tableInfo = new TableInfo("default", "test_rename");
     StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_keep");
+
+    TestUtil.testHiveToHive(tableInfo, ruleStrings, snapshotInfo);
+  }
+
+  @Test
+  public void testMove() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("move col: `robbery`, `aggravated_assault`, `burglary` before: `total_crime`");
+    ruleStrings.add("move col: `total_crime` after: `vehicle_theft`");
+
+    TableInfo tableInfo = new TableInfo("default", "test_rename");
+    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_move");
 
     TestUtil.testHiveToHive(tableInfo, ruleStrings, snapshotInfo);
   }

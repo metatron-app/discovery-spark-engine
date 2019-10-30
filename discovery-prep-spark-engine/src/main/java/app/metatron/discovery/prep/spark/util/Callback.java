@@ -56,11 +56,12 @@ public class Callback {
     updateSnapshot("ruleCntDone", String.valueOf(cnt), ssId);
   }
 
-  public void updateSnapshot(String colname, String value, String ssId) {
-    LOGGER.info("updateSnapshot(): ssId={}: update {} as {}", ssId, colname, value);
+  public void updateSnapshot(String attr, String value, String ssId) {
+    LOGGER.info("updateSnapshot(): ssId={}: update {} as {}", ssId, attr, value);
 
-    if (port <= 0) {
-      throw new IllegalArgumentException("updateSnapshot(): port should be 0");
+    if (port == 0) {
+      // When run test cases, port is set to 0.
+      return;
     }
 
     URI snapshot_uri = UriComponentsBuilder.newInstance()
@@ -72,6 +73,7 @@ public class Callback {
         .build().encode().toUri();
 
     LOGGER.info("updateSnapshot(): REST URI=" + snapshot_uri);
+    LOGGER.info("attr={} value={}", attr, value);
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -82,7 +84,7 @@ public class Callback {
     RestTemplate restTemplate = new RestTemplate(requestFactory);
 
     Map<String, String> patchItems = new HashMap<>();
-    patchItems.put(colname, value);
+    patchItems.put(attr, value);
 
     HttpEntity<Map<String, String>> entity2 = new HttpEntity<>(patchItems, headers);
     ResponseEntity<String> responseEntity;

@@ -32,7 +32,7 @@ public class BasicTest {
   public void testRename() {
     List<String> ruleStrings = new ArrayList();
 
-    ruleStrings.add("rename col: _c0 to: new_colname");
+    ruleStrings.add("rename col: column1 to: 'new_colname'");
 
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
@@ -44,7 +44,7 @@ public class BasicTest {
   public void testRenameHttpURLConnection() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
-    ruleStrings.add("rename col: _c0 to: new_colname");
+    ruleStrings.add("rename col: column1 to: 'new_colname'");
 
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
@@ -57,7 +57,7 @@ public class BasicTest {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
-    ruleStrings.add("rename col: `Date` to: `DT`");
+    ruleStrings.add("rename col: `Date` to: 'DT'");
 
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";

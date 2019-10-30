@@ -21,6 +21,7 @@ import app.metatron.discovery.prep.spark.rule.PrepDerive;
 import app.metatron.discovery.prep.spark.rule.PrepDrop;
 import app.metatron.discovery.prep.spark.rule.PrepHeader;
 import app.metatron.discovery.prep.spark.rule.PrepKeep;
+import app.metatron.discovery.prep.spark.rule.PrepMove;
 import app.metatron.discovery.prep.spark.rule.PrepRename;
 import app.metatron.discovery.prep.spark.rule.PrepReplace;
 import app.metatron.discovery.prep.spark.rule.PrepSet;
@@ -49,6 +50,8 @@ public class PrepTransformer {
     Rule rule = parser.parse(ruleString);
 
     switch (rule.getName()) {
+      case "move":
+        return (new PrepMove()).transform(df, rule);
       case "rename":
         return (new PrepRename()).transform(df, rule);
       case "header":

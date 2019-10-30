@@ -25,7 +25,7 @@ public class HdfsTest {
   public void testRename() {
     List<String> ruleStrings = new ArrayList();
 
-    ruleStrings.add("rename col: _c0 to: new_colname");
+    ruleStrings.add("rename col: column1 to: 'new_colname'");
 
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
@@ -38,7 +38,7 @@ public class HdfsTest {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
-    ruleStrings.add("rename col: `Date` to: `DT`");
+    ruleStrings.add("rename col: `Date` to: 'DT'");
 
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
