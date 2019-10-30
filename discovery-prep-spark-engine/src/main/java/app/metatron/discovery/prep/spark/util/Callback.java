@@ -57,10 +57,10 @@ public class Callback {
   }
 
   public void updateSnapshot(String colname, String value, String ssId) {
-    LOGGER.debug("updateSnapshot(): ssId={}: update {} as {}", ssId, colname, value);
+    LOGGER.info("updateSnapshot(): ssId={}: update {} as {}", ssId, colname, value);
 
-    if (port == 0) {
-      return;
+    if (port <= 0) {
+      throw new IllegalArgumentException("updateSnapshot(): port should be 0");
     }
 
     URI snapshot_uri = UriComponentsBuilder.newInstance()
@@ -71,7 +71,7 @@ public class Callback {
         .path(ssId)
         .build().encode().toUri();
 
-    LOGGER.debug("updateSnapshot(): REST URI=" + snapshot_uri);
+    LOGGER.info("updateSnapshot(): REST URI=" + snapshot_uri);
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
@@ -88,7 +88,7 @@ public class Callback {
     ResponseEntity<String> responseEntity;
     responseEntity = restTemplate.exchange(snapshot_uri, HttpMethod.PATCH, entity2, String.class);
 
-    LOGGER.debug("updateSnapshot(): done with statusCode " + responseEntity.getStatusCode());
+    LOGGER.info("updateSnapshot(): done with statusCode " + responseEntity.getStatusCode());
   }
 
   public void updateAsRunning(String ssId) {

@@ -36,7 +36,7 @@ public class SparkUtil {
 
   public static SparkSession getSession() {
     if (session == null) {
-      LOGGER.info("session == null: creating session");
+      LOGGER.info("creating session:");
       LOGGER.info("appName={} masterUri={} spark.sql.warehouse.dir={}", appName, masterUri, warehouseDir);
       LOGGER.info("spark.sql.catalogImplementation={} hive.metastore.uris={}", "hive", metastoreUris);
       LOGGER.info("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation={}", "true");
@@ -72,9 +72,6 @@ public class SparkUtil {
     df.createOrReplaceTempView(tempViewName);
   }
 
-  private void deleteUri(URI uri) {
-  }
-
   public static void prepareCreateTable(Dataset<Row> df, String dbName, String tblName) throws AnalysisException {
     createTempView(df, "temp");
     getSession().sql(String.format("DROP TABLE %s PURGE", dbName + "." + tblName));
@@ -84,7 +81,7 @@ public class SparkUtil {
     try {
       prepareCreateTable(df, dbName, tblName);
     } catch (AnalysisException e) {
-      // Suppress table not found
+      // Suppress "table not found"
     }
     String fullName = dbName + "." + tblName;
     getSession().sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", fullName, "temp"));

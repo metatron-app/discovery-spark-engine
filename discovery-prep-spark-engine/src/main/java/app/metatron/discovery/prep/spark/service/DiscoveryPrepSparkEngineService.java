@@ -36,6 +36,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.StructType;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -56,11 +57,14 @@ public class DiscoveryPrepSparkEngineService {
   int ruleCntTotal;
 
   String ssId;
+  String ssName;
   String ssType;
   String ssUri;
   String ssUriFormat;
   String dbName;
   String tblName;
+
+  String launchTime;
 
   Callback callback;
 
@@ -85,7 +89,7 @@ public class DiscoveryPrepSparkEngineService {
   }
 
   private Dataset<Row> createStage0(Map<String, Object> datasetInfo)
-      throws IOException, URISyntaxException {
+          throws IOException, URISyntaxException {
     String importType = (String) datasetInfo.get("importType");
     String dbName = (String) datasetInfo.get("dbName");
     String tblName = (String) datasetInfo.get("tblName");
@@ -106,7 +110,7 @@ public class DiscoveryPrepSparkEngineService {
           default:
             String delimiter = (String) datasetInfo.get("delimiter");
             return SparkUtil.getSession().read().format("CSV").option("delimiter", delimiter)
-                .option("header", removeUnusedRules(ruleStrings)).load(storedUri);
+                    .option("header", removeUnusedRules(ruleStrings)).load(storedUri);
         }
 
       case "STAGING_DB":
@@ -146,6 +150,7 @@ public class DiscoveryPrepSparkEngineService {
     ruleCntTotal = countAllRules(datasetInfo);
 
     ssId = (String) snapshotInfo.get("ssId");
+    ssName = (String) snapshotInfo.get("ssName");
     ssType = (String) snapshotInfo.get("ssType");
     switch (ssType) {
       case "URI":
@@ -159,12 +164,16 @@ public class DiscoveryPrepSparkEngineService {
       default:
         assert false : ssType;
     }
+    launchTime = (String) snapshotInfo.get("launchTime");
 
-    callback = new Callback((Map<String, Object>) args.get("callbackInfo"), ssId);
+    LOGGER.info("setArgs(): ssName={} launchTime={} ssType={}", ssName, launchTime, ssType);
+
+    callback = new Callback(callbackInfo, ssId);
   }
 
-  public void run(Map<String, Object> args)
-      throws AnalysisException, IOException, URISyntaxException {
+  public void run(Map<String, Object> args) throws AnalysisException, IOException, URISyntaxException {
+    LOGGER.info("run(): started");
+
     setArgs(args);
 
     SparkUtil.setAppName(appName);
@@ -246,8 +255,12 @@ public class DiscoveryPrepSparkEngineService {
 
     } catch (CancellationException ce) {
       LOGGER.info("run(): snapshot canceled from run_internal(): ", ce);
-      callback.updateSnapshot("finishTime", DateTime.now().toString(), ssId);
+
+      String finishTime = DateTime.now(DateTimeZone.UTC).toString();
+      callback.updateSnapshot("finishTime", finishTime, ssId);
       callback.updateAsCanceled(ssId);
+      LOGGER.info("run(): result=CANCELED finishTime={}", finishTime);
+
       StringBuffer sb = new StringBuffer();
 
       for (StackTraceElement ste : ce.getStackTrace()) {
@@ -258,8 +271,12 @@ public class DiscoveryPrepSparkEngineService {
       throw ce;
     } catch (Exception e) {
       LOGGER.error("run(): error while creating a snapshot: ", e);
-      callback.updateSnapshot("finishTime", DateTime.now().toString(), ssId);
+
+      String finishTime = DateTime.now(DateTimeZone.UTC).toString();
+      callback.updateSnapshot("finishTime", finishTime, ssId);
       callback.updateAsFailed(ssId);
+      LOGGER.info("run(): result=FAILED finishTime={}", finishTime);
+
       StringBuffer sb = new StringBuffer();
 
       for (StackTraceElement ste : e.getStackTrace()) {
@@ -270,8 +287,13 @@ public class DiscoveryPrepSparkEngineService {
       throw e;
     }
 
+    // Why should we write colDescs at the end of snapshot generation?
+    // It could be done by the start when the snapshot informations are filled, like ssName, ssType, etc.
     callback.updateSnapshot("custom", "Not implemented in spark engine", ssId);   // colDescs
-    callback.updateSnapshot("finishTime", DateTime.now().toString(), ssId);
+
+    String finishTime = DateTime.now(DateTimeZone.UTC).toString();
+    callback.updateSnapshot("finishTime", finishTime, ssId);
+    LOGGER.info("run(): result=SUCCEEDED finishTime={}", finishTime);
     callback.updateAsSucceeded(ssId);
   }
 }
