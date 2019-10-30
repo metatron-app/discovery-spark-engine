@@ -88,6 +88,13 @@ public class DiscoveryPrepSparkEngineService {
     return false;
   }
 
+  private Dataset<Row> renameAsColumnN(Dataset<Row> df) {
+    for (int i = 0; i < df.columns().length; i++) {
+      df = df.withColumnRenamed("_c" + i, "column" + (i + 1));
+    }
+    return df;
+  }
+
   private Dataset<Row> createStage0(Map<String, Object> datasetInfo)
           throws IOException, URISyntaxException {
     String importType = (String) datasetInfo.get("importType");
@@ -109,8 +116,14 @@ public class DiscoveryPrepSparkEngineService {
             return SparkUtil.getSession().read().schema(schema).json(storedUri);
           default:
             String delimiter = (String) datasetInfo.get("delimiter");
-            return SparkUtil.getSession().read().format("CSV").option("delimiter", delimiter)
-                    .option("header", removeUnusedRules(ruleStrings)).load(storedUri);
+            boolean header = removeUnusedRules(ruleStrings);
+            Dataset<Row> df = SparkUtil.getSession().read()
+                    .format("CSV")
+                    .option("delimiter", delimiter)
+                    .option("header", header)
+                    .load(storedUri);
+
+            return header ? df : renameAsColumnN(df);
         }
 
       case "STAGING_DB":
