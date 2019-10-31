@@ -27,6 +27,7 @@ import app.metatron.discovery.prep.spark.rule.PrepReplace;
 import app.metatron.discovery.prep.spark.rule.PrepSet;
 import app.metatron.discovery.prep.spark.rule.PrepSetType;
 import app.metatron.discovery.prep.spark.rule.PrepSort;
+import app.metatron.discovery.prep.spark.rule.PrepSplit;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
@@ -75,6 +76,8 @@ public class PrepTransformer {
         return (new PrepDerive()).transform(df, rule);
       case "replace":
         return (new PrepReplace()).transform(df, rule);
+      case "split":
+        return (new PrepSplit()).transform(df, rule);
     }
 
     LOGGER.error("Unsupported rule: " + ruleString);

@@ -41,6 +41,15 @@ public class HiveTest {
     StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_rename");
 
     TestUtil.testFileToHive(dsUri, ruleStrings, snapshotInfo);
+
+    // JSON -> Hive
+    dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
+    ruleStrings.clear();
+    ruleStrings.add("header");
+
+    // CSV -> Hive
+    snapshotInfo = new StagingDbSnapshotInfo("default", "test_sales");
+    TestUtil.testFileToHive(dsUri, ruleStrings, snapshotInfo);
   }
 
   @Test
@@ -77,6 +86,18 @@ public class HiveTest {
 
     TableInfo tableInfo = new TableInfo("default", "test_rename");
     StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_sort");
+
+    TestUtil.testHiveToHive(tableInfo, ruleStrings, snapshotInfo);
+  }
+
+  @Test
+  public void testSplit() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("split col: `shipping_result`, `city` on: ' ' limit: 1");
+
+    TableInfo tableInfo = new TableInfo("default", "test_sales");
+    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_split");
 
     TestUtil.testHiveToHive(tableInfo, ruleStrings, snapshotInfo);
   }

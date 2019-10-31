@@ -14,12 +14,13 @@
 
 package app.metatron.discovery.prep.spark.util;
 
-import java.net.URI;
+import app.metatron.discovery.prep.spark.udf.SplitEx;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.SparkSession.Builder;
+import org.apache.spark.sql.types.DataTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,10 +57,14 @@ public class SparkUtil {
                 .enableHiveSupport();
       }
       session = builder.getOrCreate();
+
+      session.udf().register("split_ex", split_ex, DataTypes.StringType);
     }
 
     return session;
   }
+
+  private static SplitEx split_ex = new SplitEx();
 
   public static void stopSession() {
     if (session != null) {
