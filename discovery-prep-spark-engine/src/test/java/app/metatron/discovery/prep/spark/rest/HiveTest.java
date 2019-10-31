@@ -67,5 +67,18 @@ public class HiveTest {
 
     TestUtil.testHiveToHive(tableInfo, ruleStrings, snapshotInfo);
   }
+
+  @Test
+  public void testSort() {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("sort order: `location`, `dt`");
+    ruleStrings.add("sort order: `dt` type: 'desc'");
+
+    TableInfo tableInfo = new TableInfo("default", "test_rename");
+    StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_sort");
+
+    TestUtil.testHiveToHive(tableInfo, ruleStrings, snapshotInfo);
+  }
 }
 
