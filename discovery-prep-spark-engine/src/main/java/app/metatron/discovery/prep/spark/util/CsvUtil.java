@@ -154,7 +154,7 @@ public class CsvUtil {
     return printer;
   }
 
-  public static long writeCsv(Dataset<Row> df, String strUri, Configuration conf)
+  public static long writeCsv(Dataset<Row> df, String strUri, Configuration conf, int limitRows)
       throws IOException, URISyntaxException {
     CSVPrinter printer = getPrinter(strUri, conf);
     long totalLines = 0L;
@@ -175,7 +175,9 @@ public class CsvUtil {
         printer.print(row.get(i));
       }
       printer.println();
-      totalLines++;
+      if (++totalLines >= limitRows) {
+        break;
+      }
     }
 
     printer.close(true);

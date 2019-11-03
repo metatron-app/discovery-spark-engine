@@ -50,6 +50,7 @@ public class DiscoveryPrepSparkEngineService {
   String masterUri;
   String warehouseDir;
   String metastoreUris;
+  Integer limitRows;
 
   Map<String, Object> datasetInfo;
   List<String> ruleStrings;
@@ -113,7 +114,7 @@ public class DiscoveryPrepSparkEngineService {
         switch (extensionType.toUpperCase()) {
           case "JSON":
             StructType schema = JsonUtil.getSchemaFromJson(storedUri);
-            return SparkUtil.getSession().read().schema(schema).json(storedUri);
+            return SparkUtil.getSession().read().schema(schema).json(storedUri).limit(limitRows);
           default:
             String delimiter = (String) datasetInfo.get("delimiter");
             boolean header = removeUnusedRules(ruleStrings);
@@ -121,13 +122,13 @@ public class DiscoveryPrepSparkEngineService {
                     .format("CSV")
                     .option("delimiter", delimiter)
                     .option("header", header)
-                    .load(storedUri);
+                    .load(storedUri).limit(limitRows);
 
             return header ? df : renameAsColumnN(df);
         }
 
       case "STAGING_DB":
-        return SparkUtil.selectTableAll(dbName, tblName);
+        return SparkUtil.selectTableAll(dbName, tblName, limitRows);
 
       case "DATABASE":
       default:
@@ -158,6 +159,8 @@ public class DiscoveryPrepSparkEngineService {
     masterUri = (String) prepProperties.get("polaris.dataprep.etl.spark.master");
     warehouseDir = (String) prepProperties.get("polaris.dataprep.etl.spark.warehouseDir");
     metastoreUris = (String) prepProperties.get("polaris.storage.stagedb.metastore.uri");
+
+    limitRows = (Integer) prepProperties.get("polaris.dataprep.etl.limitRows");
 
     ruleStrings = (List<String>) datasetInfo.get("ruleStrings");
     ruleCntTotal = countAllRules(datasetInfo);
@@ -227,9 +230,9 @@ public class DiscoveryPrepSparkEngineService {
               callback.updateAsWriting(ssId);
 
               if (ssUriFormat.equals("JSON")) {
-                totalLines = JsonUtil.writeJson(df, ssUri, null);
+                totalLines = JsonUtil.writeJson(df, ssUri, null, limitRows);
               } else {
-                totalLines = CsvUtil.writeCsv(df, ssUri, null);
+                totalLines = CsvUtil.writeCsv(df, ssUri, null, limitRows);
               }
               break;
 
@@ -240,9 +243,9 @@ public class DiscoveryPrepSparkEngineService {
               callback.updateAsWriting(ssId);
 
               if (ssUriFormat.equals("JSON")) {
-                totalLines = JsonUtil.writeJson(df, ssUri, conf);
+                totalLines = JsonUtil.writeJson(df, ssUri, conf, limitRows);
               } else {
-                totalLines = CsvUtil.writeCsv(df, ssUri, conf);
+                totalLines = CsvUtil.writeCsv(df, ssUri, conf, limitRows);
               }
               break;
 
@@ -256,7 +259,7 @@ public class DiscoveryPrepSparkEngineService {
           assert metastoreUris != null;
 
           callback.updateAsTableCreating(ssId);
-          SparkUtil.createTable(df, dbName, tblName);
+          SparkUtil.createTable(df, dbName, tblName, limitRows);
           totalLines = df.count();
           break;
 

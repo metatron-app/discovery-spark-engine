@@ -140,7 +140,7 @@ public class JsonUtil {
     return DataTypes.createStructType(fields);
   }
 
-  public static long writeJson(Dataset<Row> df, String strUri, Configuration conf)
+  public static long writeJson(Dataset<Row> df, String strUri, Configuration conf, int limitRows)
       throws URISyntaxException, IOException {
     Writer writer;
     URI uri;
@@ -243,9 +243,12 @@ public class JsonUtil {
 
       sb.setLength(sb.length() - 1);  // At least one column should not be null
       sb.append("}\n");
-      totalLines++;
 
       writer.write(sb.toString());
+      if (++totalLines >= limitRows) {
+        break;
+      }
+
       sb.setLength(0);
     }
 

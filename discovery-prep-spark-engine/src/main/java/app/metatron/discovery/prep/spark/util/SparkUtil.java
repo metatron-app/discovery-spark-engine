@@ -82,19 +82,19 @@ public class SparkUtil {
     getSession().sql(String.format("DROP TABLE %s PURGE", dbName + "." + tblName));
   }
 
-  public static void createTable(Dataset<Row> df, String dbName, String tblName) {
+  public static void createTable(Dataset<Row> df, String dbName, String tblName, int limitRows) {
     try {
       prepareCreateTable(df, dbName, tblName);
     } catch (AnalysisException e) {
       // Suppress "table not found"
     }
     String fullName = dbName + "." + tblName;
-    getSession().sql(String.format("CREATE TABLE %s AS SELECT * FROM %s", fullName, "temp"));
+    getSession().sql(String.format("CREATE TABLE %s AS SELECT * FROM %s LIMIT %d", fullName, "temp", limitRows));
   }
 
-  public static Dataset<Row> selectTableAll(String dbName, String tblName) {
+  public static Dataset<Row> selectTableAll(String dbName, String tblName, int limitRows) {
     String fullName = dbName + "." + tblName;
-    return getSession().sql(String.format("SELECT * FROM %s", fullName));
+    return getSession().sql(String.format("SELECT * FROM %s LIMIT %d", fullName, limitRows));
   }
 
   public static void setAppName(String appName) {

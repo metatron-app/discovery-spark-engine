@@ -69,12 +69,14 @@ public class TestUtil {
     Map<String, Object> prepPropertiesInfo = new HashMap();
 
     String uri = "thrift://localhost:9083";
-    String warehouseDir = "hdfs://localhost:9000/user/hive/warehouse2";
+    String warehouseDir = "hdfs://localhost:9000/user/hive/warehouse";
 
     prepPropertiesInfo.put("polaris.storage.stagedb.metastore.uri", uri);
     prepPropertiesInfo.put("polaris.dataprep.etl.spark.appName", "DiscoverySparkEngine");
     prepPropertiesInfo.put("polaris.dataprep.etl.spark.master", "local");
     prepPropertiesInfo.put("polaris.dataprep.etl.spark.warehouseDir", warehouseDir);
+
+    prepPropertiesInfo.put("polaris.dataprep.etl.limitRows", 30000);
 
     return prepPropertiesInfo;
   }
