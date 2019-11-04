@@ -34,10 +34,7 @@ public class PrepSplit extends PrepRule {
     assert limit != null;
 
     Expression quote = split.getQuote();
-    assert quote == null : quote;
-
     Boolean ignoreCase = split.getIgnoreCase();
-    assert ignoreCase == null : ignoreCase;
 
     assert on instanceof StringExpr : on;
     String strOn = ((StringExpr) on).getEscapedValue();

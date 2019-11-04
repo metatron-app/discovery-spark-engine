@@ -30,6 +30,7 @@ import app.metatron.discovery.prep.spark.rule.PrepSetType;
 import app.metatron.discovery.prep.spark.rule.PrepSort;
 import app.metatron.discovery.prep.spark.rule.PrepSplit;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
+import java.util.List;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -49,7 +50,8 @@ public class PrepTransformer {
     parser = new RuleVisitorParser();
   }
 
-  public Dataset<Row> applyRule(Dataset<Row> df, String ruleString) throws AnalysisException {
+  public Dataset<Row> applyRule(Dataset<Row> df, String ruleString, List<Dataset<Row>> slaveDfs)
+          throws AnalysisException {
     Rule rule = parser.parse(ruleString);
 
     switch (rule.getName()) {

@@ -18,6 +18,8 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -53,10 +55,10 @@ public class Callback {
     int cnt = snapshotRuleDoneCnt.get(ssId);
     snapshotRuleDoneCnt.put(ssId, ++cnt);
 
-    updateSnapshot("ruleCntDone", String.valueOf(cnt), ssId);
+    updateSnapshot(ssId, "ruleCntDone", String.valueOf(cnt));
   }
 
-  public void updateSnapshot(String attr, String value, String ssId) {
+  public void updateSnapshot(String ssId, String attr, String value) {
     LOGGER.info("updateSnapshot(): ssId={}: update {} as {}", ssId, attr, value);
 
     if (port == 0) {
@@ -65,12 +67,12 @@ public class Callback {
     }
 
     URI snapshot_uri = UriComponentsBuilder.newInstance()
-        .scheme("http")
-        .host("localhost")
-        .port(port)
-        .path("/api/preparationsnapshots/")
-        .path(ssId)
-        .build().encode().toUri();
+            .scheme("http")
+            .host("localhost")
+            .port(port)
+            .path("/api/preparationsnapshots/")
+            .path(ssId)
+            .build().encode().toUri();
 
     LOGGER.info("updateSnapshot(): REST URI=" + snapshot_uri);
     LOGGER.info("attr={} value={}", attr, value);
@@ -95,36 +97,44 @@ public class Callback {
 
   public void updateAsRunning(String ssId) {
     cancelCheck(ssId);
-    updateSnapshot("status", "RUNNING", ssId);
+    updateSnapshot(ssId, "status", "RUNNING");
   }
 
   public void updateAsWriting(String ssId) {
     cancelCheck(ssId);
-    updateSnapshot("status", "WRITING", ssId);
+    updateSnapshot(ssId, "status", "WRITING");
   }
 
   public void updateAsTableCreating(String ssId) {
     cancelCheck(ssId);
-    updateSnapshot("status", "TABLE_CREATING", ssId);
+    updateSnapshot(ssId, "status", "TABLE_CREATING");
   }
 
   public void updateAsSucceeded(String ssId) {
-    updateSnapshot("status", "SUCCEEDED", ssId);
+    updateSnapshot(ssId, "status", "SUCCEEDED");
     snapshotRuleDoneCnt.remove(ssId);
   }
 
   public void updateAsFailed(String ssId) {
-    updateSnapshot("status", "FAILED", ssId);
+    updateSnapshot(ssId, "status", "FAILED");
     snapshotRuleDoneCnt.remove(ssId);
   }
 
   public void updateAsCanceled(String ssId) {
-    updateSnapshot("status", "CANCELED", ssId);
+    updateSnapshot(ssId, "status", "CANCELED");
     snapshotRuleDoneCnt.remove(ssId);
   }
 
   // synchronize with what?
   synchronized public void cancelCheck(String ssId) throws CancellationException {
     // Not implemented
+  }
+
+  public void updateStatus(String ssId, String status) {
+    updateSnapshot(ssId, "status", status);
+
+    if (status.equals("SUCCEEDED") || status.equals("FAILED") || status.equals("CANCELED")) {
+      updateSnapshot(ssId, "finishTime", DateTime.now(DateTimeZone.UTC).toString());
+    }
   }
 }

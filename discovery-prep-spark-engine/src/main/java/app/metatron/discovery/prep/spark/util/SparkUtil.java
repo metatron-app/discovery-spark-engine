@@ -109,7 +109,15 @@ public class SparkUtil {
     SparkUtil.metastoreUris = metastoreUris;
   }
 
+  public static String getMetastoreUris() {
+    return metastoreUris;
+  }
+
   public static void setWarehouseDir(String warehouseDir) {
     SparkUtil.warehouseDir = warehouseDir;
+  }
+
+  public static String getWarehouseDir() {
+    return warehouseDir;
   }
 }

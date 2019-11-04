@@ -14,31 +14,38 @@
 
 package app.metatron.discovery.prep.spark.service;
 
+import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_MAX_FETCH_SIZE;
+import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_APP_NAME;
+import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_MASTER;
+import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_WAREHOUSE_DIR;
+import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_TIMEOUT;
+import static app.metatron.discovery.prep.spark.service.PropertyConstant.STORAGE_STAGEDB_METASTORE_URI;
+
 import app.metatron.discovery.prep.parser.preparation.RuleVisitorParser;
 import app.metatron.discovery.prep.parser.preparation.rule.Header;
+import app.metatron.discovery.prep.parser.preparation.rule.Join;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
+import app.metatron.discovery.prep.parser.preparation.rule.Union;
+import app.metatron.discovery.prep.parser.preparation.rule.expr.Constant;
+import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
 import app.metatron.discovery.prep.spark.PrepTransformer;
 import app.metatron.discovery.prep.spark.util.Callback;
-import app.metatron.discovery.prep.spark.util.CsvUtil;
-import app.metatron.discovery.prep.spark.util.JsonUtil;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.types.StructType;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,28 +53,227 @@ public class DiscoveryPrepSparkEngineService {
 
   private static Logger LOGGER = LoggerFactory.getLogger(DiscoveryPrepSparkEngineService.class);
 
-  String appName;
-  String masterUri;
-  String warehouseDir;
-  String metastoreUris;
-  Integer limitRows;
+  @Autowired
+  FileService fileService;
 
-  Map<String, Object> datasetInfo;
-  List<String> ruleStrings;
-  List<Map<String, Object>> upstreamDatasetInfos;
-  int ruleCntTotal;
+  @Autowired
+  StagingDbService stagingDbService;
 
-  String ssId;
-  String ssName;
-  String ssType;
-  String ssUri;
-  String ssUriFormat;
-  String dbName;
-  String tblName;
+  private Integer timeout;
+  private Integer maxFetchSize;
+  private Callback callback;
 
-  String launchTime;
+  private Map<String, Dataset<Row>> cache = new HashMap();
 
-  Callback callback;
+  private void setPrepPropertiesInfo(Map<String, Object> prepPropertiesInfo) {
+    timeout = (Integer) prepPropertiesInfo.get(ETL_TIMEOUT);
+    maxFetchSize = (Integer) prepPropertiesInfo.get(ETL_MAX_FETCH_SIZE);
+
+    SparkUtil.setAppName((String) prepPropertiesInfo.get(ETL_SPARK_APP_NAME));
+    SparkUtil.setMasterUri((String) prepPropertiesInfo.get(ETL_SPARK_MASTER));
+    SparkUtil.setMetastoreUris((String) prepPropertiesInfo.get(STORAGE_STAGEDB_METASTORE_URI));
+    if (SparkUtil.getMetastoreUris() != null) {
+      SparkUtil.setWarehouseDir((String) prepPropertiesInfo.get(ETL_SPARK_WAREHOUSE_DIR));
+      assert SparkUtil.getMetastoreUris() != null;
+    }
+
+  }
+
+  private void putStackTraceIntoCustomField(String ssId, Exception e) {
+    StringBuffer sb = new StringBuffer();
+
+    for (StackTraceElement ste : e.getStackTrace()) {
+      sb.append("\n");
+      sb.append(ste.toString());
+    }
+    callback.updateSnapshot(ssId, "custom", "{'fail_msg':'" + sb.toString() + "'}");
+  }
+
+  public void run(Map<String, Object> args)
+          throws AnalysisException, IOException, URISyntaxException, InterruptedException {
+    LOGGER.info("run(): started");
+
+    // 1. Prepare the arguments and settings
+    Map<String, Object> prepPropertiesInfo = (Map<String, Object>) args.get("prepProperties");
+    Map<String, Object> dsInfo = (Map<String, Object>) args.get("datasetInfo");
+    Map<String, Object> snapshotInfo = (Map<String, Object>) args.get("snapshotInfo");
+    Map<String, Object> callbackInfo = (Map<String, Object>) args.get("callbackInfo");
+
+    String dsId = (String) dsInfo.get("origTeddyDsId");
+
+    String ssId = (String) snapshotInfo.get("ssId");
+    String ssName = (String) snapshotInfo.get("ssName");
+    String ssType = (String) snapshotInfo.get("ssType");
+    String launchTime = (String) snapshotInfo.get("launchTime");
+
+    LOGGER.info("run(): dsId={} ssName={} launchTime={} ssType={}", dsId, ssName, launchTime, ssType);
+
+    setPrepPropertiesInfo(prepPropertiesInfo);
+
+    fileService.setPrepPropertiesInfo(prepPropertiesInfo);
+    stagingDbService.setPrepPropertiesInfo(prepPropertiesInfo);
+
+    callback = new Callback(callbackInfo, ssId);
+    callback.updateSnapshot(ssId, "ruleCntTotal", String.valueOf(countAllRules(dsInfo)));
+    callback.updateAsRunning(ssId);
+
+    if (ssType == null) {
+      callback.updateAsFailed(ssId);
+      throw new IllegalArgumentException("The request does not contain snapshot type");
+    }
+
+    // 2. Transform the DataFrame with rule strings
+    transformDf(ssId, dsInfo);
+
+    // 3. Write the transformed DataFrame.
+    Dataset<Row> df = cache.get(dsId);
+    callback.updateAsWriting(ssId);
+
+    switch (ssType) {
+      case "URI":
+        long totalLines = fileService.createSnapshot(df, snapshotInfo);
+        callback.updateSnapshot(ssId, "totalLines", String.valueOf(totalLines));
+        break;
+      case "STAGING_DB":
+        callback.updateAsTableCreating(ssId);
+        totalLines = stagingDbService.createSnapshot(df, snapshotInfo);
+        callback.updateSnapshot(ssId, "totalLines", String.valueOf(totalLines));
+        break;
+      default:
+        assert false : ssType;
+    }
+
+    // Why should we write colDescs at the end of snapshot generation?
+    // It could be done by the start when the snapshot informations are filled, like ssName, ssType, etc.
+    callback.updateSnapshot(ssId, "custom", "Not implemented in spark engine");   // colDescs
+
+    String finishTime = DateTime.now(DateTimeZone.UTC).toString();
+    callback.updateSnapshot(ssId, "finishTime", finishTime);
+
+    LOGGER.info("run(): result={} finishTime={}", "SUCCEEDED", finishTime);
+    callback.updateAsSucceeded(ssId);
+  }
+
+  private void transformDf(String ssId, Map<String, Object> dsInfo)
+          throws IOException, AnalysisException, URISyntaxException, InterruptedException {
+    try {
+      transformRecursive(ssId, dsInfo);
+    } catch (CancellationException e) {
+      handleException(ssId, "CANCELED", e);
+      throw e;
+    } catch (URISyntaxException e) {
+      handleException(ssId, "FAILED", e);
+      throw e;
+    }
+
+    LOGGER.info("transformDf(): done: ssId={}", ssId);
+  }
+
+  private void transformRecursive(String ssId, Map<String, Object> dsInfo)
+          throws IOException, URISyntaxException, AnalysisException {
+    String dsId = (String) dsInfo.get("origTeddyDsId");
+
+    // We don't need to convert dataset like Embedded engine.
+    List<String> ruleStrings = (List<String>) dsInfo.get("ruleStrings");
+    boolean header = removeUnusedRules(ruleStrings);
+    Dataset<Row> df = createStage0(dsInfo, header);
+
+    // Transform upstreams first.
+    List<Map<String, Object>> upstreamDatasetInfos = (List<Map<String, Object>>) dsInfo.get("upstreamDatasetInfos");
+    if (upstreamDatasetInfos != null) {
+      for (Map<String, Object> upstreamDatasetInfo : upstreamDatasetInfos) {
+        transformRecursive(ssId, upstreamDatasetInfo);
+      }
+    }
+
+    // Transform
+    PrepTransformer transformer = new PrepTransformer();
+    for (String ruleString : ruleStrings) {
+      df = transformer.applyRule(df, ruleString, getSlaveDfs(ruleString));
+      callback.incrRuleCntDone(ssId);
+    }
+    cache.put(dsId, df);
+  }
+
+  private long countAllRules(Map<String, Object> dsInfo) {
+    long ruleCntTotal = 0L;
+
+    List<Map<String, Object>> upstreamDatasetInfos = (List<Map<String, Object>>) dsInfo.get("upstreamDatasetInfos");
+    if (upstreamDatasetInfos != null) {
+      for (Map<String, Object> upstreamDatasetInfo : upstreamDatasetInfos) {
+        ruleCntTotal += countAllRules(upstreamDatasetInfo);
+      }
+    }
+
+    return ruleCntTotal + ((List<String>) dsInfo.get("ruleStrings")).size();
+  }
+
+  private Dataset<Row> createStage0(Map<String, Object> dsInfo, boolean header) throws IOException, URISyntaxException {
+    Dataset<Row> df;
+    String dsId = ((String) dsInfo.get("origTeddyDsId"));
+    LOGGER.trace("createStage0(): dsId={}", dsId);
+
+    String importType = (String) dsInfo.get("importType");
+    switch (importType) {
+      case "UPLOAD":
+      case "URI":
+        df = fileService.createStage0(dsInfo, header);
+        break;
+
+      case "STAGING_DB":
+        df = stagingDbService.createStage0(dsInfo);
+        break;
+
+      case "DATABASE":
+      default:
+        throw new IllegalArgumentException("createStage0(): not supported importType: " + importType);
+    }
+
+    LOGGER.trace("createStage0(): end");
+    return df;
+  }
+
+  static public List<String> getSlaveDsIds(String ruleString) {
+    Rule rule = new RuleVisitorParser().parse(ruleString);
+
+    switch (rule.getName()) {
+      case "join":
+        return getLiteralList(((Join) rule).getDataset2());
+      case "union":
+        return getLiteralList(((Union) rule).getDataset2());
+      default:
+        return null;
+    }
+  }
+
+  static private List<String> getLiteralList(Expression expr) {
+    List<String> literals = null;
+    if (expr instanceof Constant.StringExpr) {
+      literals = new ArrayList<>();
+      literals.add(((Constant.StringExpr) expr).getEscapedValue());
+    } else if (expr instanceof Constant.ArrayExpr) {
+      literals = ((Constant.ArrayExpr) expr).getValue();
+      for (int i = 0; i < literals.size(); i++) {
+        literals.set(i, literals.get(i).replaceAll("'", ""));
+      }
+    } else {
+      assert false : expr;
+    }
+    return literals;
+  }
+
+  private List<Dataset<Row>> getSlaveDfs(String ruleString) {
+    List<Dataset<Row>> slaveDfs = new ArrayList();
+
+    List<String> slaveDsIds = getSlaveDsIds(ruleString);
+    if (slaveDsIds != null) {
+      for (String slaveDsId : slaveDsIds) {
+        slaveDfs.add(cache.get(slaveDsId));
+      }
+    }
+
+    return slaveDfs;
+  }
 
   private boolean removeUnusedRules(List<String> ruleStrings) {
     if (ruleStrings.size() > 0 && ruleStrings.get(0).startsWith("create")) {
@@ -89,227 +295,9 @@ public class DiscoveryPrepSparkEngineService {
     return false;
   }
 
-  private Dataset<Row> renameAsColumnN(Dataset<Row> df) {
-    for (int i = 0; i < df.columns().length; i++) {
-      df = df.withColumnRenamed("_c" + i, "column" + (i + 1));
-    }
-    return df;
-  }
-
-  private Dataset<Row> createStage0(Map<String, Object> datasetInfo)
-          throws IOException, URISyntaxException {
-    String importType = (String) datasetInfo.get("importType");
-    String dbName = (String) datasetInfo.get("dbName");
-    String tblName = (String) datasetInfo.get("tblName");
-    List<String> ruleStrings = (List<String>) datasetInfo.get("ruleStrings");
-
-    switch (importType) {
-      case "UPLOAD":
-      case "URI":
-        String storedUri = (String) datasetInfo.get("storedUri");
-        Integer columnCount = (Integer) datasetInfo.get("manualColumnCount");
-        String extensionType = FilenameUtils.getExtension(storedUri);
-
-        // If not .json, treat as a CSV.
-        switch (extensionType.toUpperCase()) {
-          case "JSON":
-            StructType schema = JsonUtil.getSchemaFromJson(storedUri);
-            return SparkUtil.getSession().read().schema(schema).json(storedUri).limit(limitRows);
-          default:
-            String delimiter = (String) datasetInfo.get("delimiter");
-            boolean header = removeUnusedRules(ruleStrings);
-            Dataset<Row> df = SparkUtil.getSession().read()
-                    .format("CSV")
-                    .option("delimiter", delimiter)
-                    .option("header", header)
-                    .load(storedUri).limit(limitRows);
-
-            return header ? df : renameAsColumnN(df);
-        }
-
-      case "STAGING_DB":
-        return SparkUtil.selectTableAll(dbName, tblName, limitRows);
-
-      case "DATABASE":
-      default:
-        throw new IOException("Wrong importType: " + importType);
-    }
-  }
-
-  private int countAllRules(Map<String, Object> datasetInfo) {
-    upstreamDatasetInfos = (List<Map<String, Object>>) datasetInfo.get("upstreamDatasetInfos");
-    if (upstreamDatasetInfos == null) {
-      return ruleStrings.size();
-    }
-
-    for (Map<String, Object> upstreamDatasetInfo : upstreamDatasetInfos) {
-      ruleCntTotal += countAllRules(upstreamDatasetInfo);
-    }
-    return ruleCntTotal + ((List<String>) datasetInfo.get("ruleStrings")).size();
-  }
-
-  public void setArgs(Map<String, Object> args) {
-    Map<String, Object> prepProperties = (Map<String, Object>) args.get("prepProperties");
-    Map<String, Object> snapshotInfo = (Map<String, Object>) args.get("snapshotInfo");
-    Map<String, Object> callbackInfo = (Map<String, Object>) args.get("callbackInfo");
-
-    datasetInfo = (Map<String, Object>) args.get("datasetInfo");
-
-    appName = (String) prepProperties.get("polaris.dataprep.etl.spark.appName");
-    masterUri = (String) prepProperties.get("polaris.dataprep.etl.spark.master");
-    warehouseDir = (String) prepProperties.get("polaris.dataprep.etl.spark.warehouseDir");
-    metastoreUris = (String) prepProperties.get("polaris.storage.stagedb.metastore.uri");
-
-    limitRows = (Integer) prepProperties.get("polaris.dataprep.etl.limitRows");
-
-    ruleStrings = (List<String>) datasetInfo.get("ruleStrings");
-    ruleCntTotal = countAllRules(datasetInfo);
-
-    ssId = (String) snapshotInfo.get("ssId");
-    ssName = (String) snapshotInfo.get("ssName");
-    ssType = (String) snapshotInfo.get("ssType");
-    switch (ssType) {
-      case "URI":
-        ssUri = (String) snapshotInfo.get("storedUri");
-        ssUriFormat = ssUri.endsWith(".json") ? "JSON" : "CSV";
-        break;
-      case "STAGING_DB":
-        dbName = (String) snapshotInfo.get("dbName");
-        tblName = (String) snapshotInfo.get("tblName");
-        break;
-      default:
-        assert false : ssType;
-    }
-    launchTime = (String) snapshotInfo.get("launchTime");
-
-    LOGGER.info("setArgs(): ssName={} launchTime={} ssType={}", ssName, launchTime, ssType);
-
-    callback = new Callback(callbackInfo, ssId);
-  }
-
-  public void run(Map<String, Object> args) throws AnalysisException, IOException, URISyntaxException {
-    LOGGER.info("run(): started");
-
-    setArgs(args);
-
-    SparkUtil.setAppName(appName);
-    SparkUtil.setMasterUri(masterUri);
-
-    if (metastoreUris != null) {
-      SparkUtil.setMetastoreUris(metastoreUris);
-      assert warehouseDir != null;
-      SparkUtil.setWarehouseDir(warehouseDir);
-    }
-
-    callback.updateSnapshot("ruleCntTotal", String.valueOf(ruleCntTotal), ssId);
-    callback.updateAsRunning(ssId);
-
-    try {
-      // Load dataset
-      Dataset<Row> df = createStage0(datasetInfo);
-      long totalLines;
-
-      // Transform dataset
-      PrepTransformer transformer = new PrepTransformer();
-      for (String ruleString : ruleStrings) {
-        df = transformer.applyRule(df, ruleString);
-        callback.incrRuleCntDone(ssId);
-      }
-
-      // Write as snapshot
-      switch (ssType) {
-        case "URI":
-          URI uri = new URI(ssUri);
-          if (uri.getScheme() == null) {
-            ssUri = "file://" + ssUri;
-            uri = new URI(ssUri);
-          }
-
-          switch (uri.getScheme()) {
-            case "file":
-              callback.updateAsWriting(ssId);
-
-              if (ssUriFormat.equals("JSON")) {
-                totalLines = JsonUtil.writeJson(df, ssUri, null, limitRows);
-              } else {
-                totalLines = CsvUtil.writeCsv(df, ssUri, null, limitRows);
-              }
-              break;
-
-            case "hdfs":
-              Configuration conf = new Configuration();
-              conf.addResource(new Path(System.getenv("HADOOP_CONF_DIR") + "/core-site.xml"));
-
-              callback.updateAsWriting(ssId);
-
-              if (ssUriFormat.equals("JSON")) {
-                totalLines = JsonUtil.writeJson(df, ssUri, conf, limitRows);
-              } else {
-                totalLines = CsvUtil.writeCsv(df, ssUri, conf, limitRows);
-              }
-              break;
-
-            default:
-              throw new IOException("Wrong uri scheme: " + uri);
-          }
-
-          break;
-
-        case "STAGING_DB":
-          assert metastoreUris != null;
-
-          callback.updateAsTableCreating(ssId);
-          SparkUtil.createTable(df, dbName, tblName, limitRows);
-          totalLines = df.count();
-          break;
-
-        default:
-          throw new IOException("Wrong ssType: " + ssType);
-      }
-
-      callback.updateSnapshot("totalLines", String.valueOf(totalLines), ssId);
-
-    } catch (CancellationException ce) {
-      LOGGER.info("run(): snapshot canceled from run_internal(): ", ce);
-
-      String finishTime = DateTime.now(DateTimeZone.UTC).toString();
-      callback.updateSnapshot("finishTime", finishTime, ssId);
-      callback.updateAsCanceled(ssId);
-      LOGGER.info("run(): result=CANCELED finishTime={}", finishTime);
-
-      StringBuffer sb = new StringBuffer();
-
-      for (StackTraceElement ste : ce.getStackTrace()) {
-        sb.append("\n");
-        sb.append(ste.toString());
-      }
-      callback.updateSnapshot("custom", "{'fail_msg':'" + sb.toString() + "'}", ssId);
-      throw ce;
-    } catch (Exception e) {
-      LOGGER.error("run(): error while creating a snapshot: ", e);
-
-      String finishTime = DateTime.now(DateTimeZone.UTC).toString();
-      callback.updateSnapshot("finishTime", finishTime, ssId);
-      callback.updateAsFailed(ssId);
-      LOGGER.info("run(): result=FAILED finishTime={}", finishTime);
-
-      StringBuffer sb = new StringBuffer(e.getMessage());
-
-      for (StackTraceElement ste : e.getStackTrace()) {
-        sb.append("\n");
-        sb.append(ste.toString());
-      }
-      callback.updateSnapshot("custom", "{'fail_msg':'" + sb.toString() + "'}", ssId);
-      throw e;
-    }
-
-    // Why should we write colDescs at the end of snapshot generation?
-    // It could be done by the start when the snapshot informations are filled, like ssName, ssType, etc.
-    callback.updateSnapshot("custom", "Not implemented in spark engine", ssId);   // colDescs
-
-    String finishTime = DateTime.now(DateTimeZone.UTC).toString();
-    callback.updateSnapshot("finishTime", finishTime, ssId);
-    LOGGER.info("run(): result=SUCCEEDED finishTime={}", finishTime);
-    callback.updateAsSucceeded(ssId);
+  private void handleException(String ssId, String status, Exception e) {
+    LOGGER.info("transformDf(): stopped: ssid={} status={}", ssId, status);
+    putStackTraceIntoCustomField(ssId, e);
+    callback.updateStatus(ssId, status);
   }
 }

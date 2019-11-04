@@ -24,10 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.util.Iterator;
-import javax.servlet.ServletOutputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
@@ -64,8 +61,7 @@ public class CsvUtil {
    *
    * header will be false for table-type snapshots.
    */
-  public static CSVPrinter getPrinter(String strUri, Configuration conf)
-      throws IOException, URISyntaxException {
+  public static CSVPrinter getPrinter(String strUri, Configuration conf) throws IOException, URISyntaxException {
     Writer writer;
     URI uri;
 
@@ -81,9 +77,9 @@ public class CsvUtil {
     switch (uri.getScheme()) {
       case "hdfs":
         if (conf == null) {
-          LOGGER.error(
-              "getPrinter(): Required property missing: check polaris.dataprep.hadoopConfDir: strUri={}",
-              strUri);
+          LOGGER.error("getPrinter(): Required property missing: check polaris.dataprep.hadoopConfDir: strUri={}",
+                  strUri);
+          throw new IOException("getPrinter(): Required property missing: check polaris.dataprep.hadoopConfDir");
         }
         Path path = new Path(uri);
 
@@ -92,9 +88,7 @@ public class CsvUtil {
         try {
           hdfsFs = FileSystem.get(conf);
         } catch (IOException e) {
-          LOGGER.error(
-              "getPrinter(): Cannot get file system: check polaris.dataprep.hadoopConfDir: strUri={}",
-              strUri);
+          LOGGER.error("getPrinter(): Cannot get file system: check polaris.dataprep.hadoopConfDir: strUri={}", strUri);
           throw e;
         }
 
@@ -102,9 +96,7 @@ public class CsvUtil {
         try {
           hos = hdfsFs.create(path);
         } catch (IOException e) {
-          LOGGER.error(
-              "getPrinter(): Cannot create a file: polaris.dataprep.hadoopConfDir: strUri={}",
-              strUri);
+          LOGGER.error("getPrinter(): Cannot create a file: polaris.dataprep.hadoopConfDir: strUri={}", strUri);
           throw e;
         }
 
@@ -128,9 +120,8 @@ public class CsvUtil {
         try {
           fos = new FileOutputStream(file);
         } catch (FileNotFoundException e) {
-          LOGGER.error(
-              "getPrinter(): FileNotFoundException: Check the permission of snapshot directory: strUri={}",
-              strUri);
+          LOGGER.error("getPrinter(): FileNotFoundException: Check the permission of snapshot directory: strUri={}",
+                  strUri);
           throw e;
         }
 
@@ -155,7 +146,7 @@ public class CsvUtil {
   }
 
   public static long writeCsv(Dataset<Row> df, String strUri, Configuration conf, int limitRows)
-      throws IOException, URISyntaxException {
+          throws IOException, URISyntaxException {
     CSVPrinter printer = getPrinter(strUri, conf);
     long totalLines = 0L;
 
