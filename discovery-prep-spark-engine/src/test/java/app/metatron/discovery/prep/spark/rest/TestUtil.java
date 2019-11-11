@@ -110,14 +110,15 @@ public class TestUtil {
     return prepPropertiesInfo;
   }
 
-  static Map<String, Object> buildDatasetInfo(String ssUri, String delimiter,
-          List<String> ruleStrings) {
+  static Map<String, Object> buildDatasetInfo(String ssUri, String delimiter, List<String> ruleStrings,
+          Integer manualColumnCount) {
     Map<String, Object> datasetInfo = new HashMap();
 
     datasetInfo.put("importType", "URI");
     datasetInfo.put("storedUri", ssUri);
     datasetInfo.put("delimiter", delimiter);
     datasetInfo.put("ruleStrings", ruleStrings);
+    datasetInfo.put("manualColumnCount", manualColumnCount);
 
     return datasetInfo;
   }
@@ -164,14 +165,15 @@ public class TestUtil {
   }
 
   static private void testToSucceed(List<String> ruleStrings, String dsUri, String ssUri, TableInfo tableInfo,
-          StagingDbSnapshotInfo stagingDbSnapshotInfo, boolean useRestAssure) throws IOException {
+          StagingDbSnapshotInfo stagingDbSnapshotInfo, boolean useRestAssure, Integer manualColumnCount)
+          throws IOException {
     Map<String, Object> args = new HashMap();
 
     args.put("prepProperties", buildPrepPropertiesInfo());
     args.put("callbackInfo", buildCallbackInfo());
 
     if (dsUri != null) {
-      args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
+      args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings, manualColumnCount));
     } else {
       assert tableInfo != null;
       args.put("datasetInfo", buildDatasetInfo(tableInfo, ruleStrings));
@@ -239,23 +241,28 @@ public class TestUtil {
   }
 
   static void testFileToFile(String dsUri, List<String> ruleStrings, String ssUri) throws IOException {
-    testToSucceed(ruleStrings, dsUri, ssUri, null, null, true);
+    testToSucceed(ruleStrings, dsUri, ssUri, null, null, true, null);
+  }
+
+  static void testFileToFile(String dsUri, List<String> ruleStrings, String ssUri, Integer manualColumnCount)
+          throws IOException {
+    testToSucceed(ruleStrings, dsUri, ssUri, null, null, true, manualColumnCount);
   }
 
   // This is a test for real use of the API of discovery-spark-engine,
   // because the actual call method is a common HTTP POST request, not REST Assured test suite.
   static void testFileToCsvHttpURLConnection(String dsUri, List<String> ruleStrings, String ssUri) throws IOException {
-    testToSucceed(ruleStrings, dsUri, ssUri, null, null, false);
+    testToSucceed(ruleStrings, dsUri, ssUri, null, null, false, null);
   }
 
   static void testFileToHive(String dsUri, List<String> ruleStrings, StagingDbSnapshotInfo stagingDbSnapshotInfo)
           throws IOException {
-    testToSucceed(ruleStrings, dsUri, null, null, stagingDbSnapshotInfo, true);
+    testToSucceed(ruleStrings, dsUri, null, null, stagingDbSnapshotInfo, true, null);
   }
 
   static void testHiveToHive(TableInfo tableInfo, List<String> ruleStrings, StagingDbSnapshotInfo stagingDbSnapshotInfo)
           throws IOException {
-    testToSucceed(ruleStrings, null, null, tableInfo, stagingDbSnapshotInfo, true);
+    testToSucceed(ruleStrings, null, null, tableInfo, stagingDbSnapshotInfo, true, null);
   }
 }
 

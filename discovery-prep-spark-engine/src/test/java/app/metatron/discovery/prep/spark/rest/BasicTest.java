@@ -116,6 +116,18 @@ public class BasicTest {
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
+  @Test
+  public void testDynamicColcnt() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("merge col: column2, column3, column4, column5, column6 with: '_' as: 'all'");
+
+    String dsUri = TestUtil.getResourcePath("csv/dynamic_colcnt.csv");
+    String ssUri = "/tmp/dataprep/snapshots/dynamic_colcnt.snapshot.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, 6);
+  }
+
   //  @Test
   public void testLargeFile() throws IOException {
     List<String> ruleStrings = new ArrayList();

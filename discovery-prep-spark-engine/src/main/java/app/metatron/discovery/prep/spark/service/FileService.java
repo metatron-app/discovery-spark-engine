@@ -23,12 +23,17 @@ import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,18 +99,11 @@ public class FileService {
     return totalLines;
   }
 
-  private Dataset<Row> renameAsColumnN(Dataset<Row> df) {
-    for (int i = 0; i < df.columns().length; i++) {
-      df = df.withColumnRenamed("_c" + i, "column" + (i + 1));
-    }
-    return df;
-  }
-
   public Dataset<Row> createStage0(Map<String, Object> datasetInfo, boolean header)
           throws IOException, URISyntaxException {
     String storedUri = (String) datasetInfo.get("storedUri");
-    Integer columnCount = (Integer) datasetInfo.get("manualColumnCount");
     String extensionType = FilenameUtils.getExtension(storedUri);
+    Integer columnCount = (Integer) datasetInfo.get("manualColumnCount");
 
     // If not .json, treat as a CSV.
     switch (extensionType.toUpperCase()) {
@@ -114,13 +112,21 @@ public class FileService {
         return SparkUtil.getSession().read().schema(schema).json(storedUri).limit(limitRows);
       default:
         String delimiter = (String) datasetInfo.get("delimiter");
-        Dataset<Row> df = SparkUtil.getSession().read()
+        DataFrameReader reader = SparkUtil.getSession().read()
                 .format("CSV")
-                .option("delimiter", delimiter)
-                .option("header", header)
-                .load(storedUri).limit(limitRows);
+                .option("delimiter", delimiter);
 
-        return header ? df : renameAsColumnN(df);
+        if (header || columnCount == null) {  // columnCount null is used in test codes
+          return reader.option("header", header).load(storedUri).limit(limitRows);
+        }
+
+        List<StructField> fields = new ArrayList();
+        for (int i = 1; i <= columnCount; i++) {
+          StructField field = DataTypes.createStructField("column" + i, DataTypes.StringType, true);
+          fields.add(field);
+        }
+        schema = DataTypes.createStructType(fields);
+        return reader.schema(schema).load(storedUri).limit(limitRows);
     }
   }
 }

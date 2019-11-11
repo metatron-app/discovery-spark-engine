@@ -211,7 +211,7 @@ public class DiscoveryPrepSparkEngineService {
   private Dataset<Row> createStage0(Map<String, Object> dsInfo, boolean header) throws IOException, URISyntaxException {
     Dataset<Row> df;
     String dsId = ((String) dsInfo.get("origTeddyDsId"));
-    LOGGER.trace("createStage0(): dsId={}", dsId);
+    LOGGER.debug("createStage0(): dsId={}", dsId);
 
     String importType = (String) dsInfo.get("importType");
     switch (importType) {
@@ -229,7 +229,7 @@ public class DiscoveryPrepSparkEngineService {
         throw new IllegalArgumentException("createStage0(): not supported importType: " + importType);
     }
 
-    LOGGER.trace("createStage0(): end");
+    LOGGER.debug("createStage0(): end");
     return df;
   }
 

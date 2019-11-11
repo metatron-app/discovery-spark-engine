@@ -16,8 +16,6 @@ package app.metatron.discovery.prep.spark.rule;
 
 import app.metatron.discovery.prep.parser.preparation.rule.Merge;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
-import app.metatron.discovery.prep.parser.preparation.rule.Split;
-import app.metatron.discovery.prep.parser.preparation.rule.expr.Constant.StringExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.util.List;
