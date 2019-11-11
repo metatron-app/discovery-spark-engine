@@ -14,6 +14,7 @@
 
 package app.metatron.discovery.prep.spark.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -22,7 +23,7 @@ import org.junit.Test;
 public class SetTypeTest {
 
   @Test
-  public void testSetTypeLong() {
+  public void testSetTypeLong() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -35,11 +36,11 @@ public class SetTypeTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testSetTypeDouble() {
+  public void testSetTypeDouble() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -48,11 +49,11 @@ public class SetTypeTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testSetTypeDate() {
+  public void testSetTypeDate() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -61,11 +62,11 @@ public class SetTypeTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testSetTypeTimestamp() {
+  public void testSetTypeTimestamp() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -75,11 +76,11 @@ public class SetTypeTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testSetTypeTimestampFormat() {
+  public void testSetTypeTimestampFormat() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -90,6 +91,6 @@ public class SetTypeTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 }

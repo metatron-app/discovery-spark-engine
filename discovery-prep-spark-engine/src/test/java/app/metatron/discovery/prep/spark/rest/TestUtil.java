@@ -65,6 +65,35 @@ public class TestUtil {
     System.out.println(response.toString());
   }
 
+  public static class TableInfo {
+
+    public String dbName;
+    public String tblName;
+
+    public TableInfo() {
+    }
+
+    public TableInfo(String dbName, String tblName) {
+      this.dbName = dbName;
+      this.tblName = tblName;
+    }
+  }
+
+  public static class StagingDbSnapshotInfo {
+
+    TableInfo tableInfo;
+
+    // TO BE ADDED (like compression, partition, append mode, ...)
+
+    public StagingDbSnapshotInfo() {
+    }
+
+    public StagingDbSnapshotInfo(String dbName, String tblName) {
+      tableInfo = new TableInfo(dbName, tblName);
+    }
+  }
+
+
   static Map<String, Object> buildPrepPropertiesInfo() {
     Map<String, Object> prepPropertiesInfo = new HashMap();
 
@@ -134,40 +163,45 @@ public class TestUtil {
     return callbackInfo;
   }
 
-  static void testFileToCsv(String dsUri, List<String> ruleStrings, String ssUri) {
+  static private void testToSucceed(List<String> ruleStrings, String dsUri, String ssUri, TableInfo tableInfo,
+          StagingDbSnapshotInfo stagingDbSnapshotInfo, boolean useRestAssure) throws IOException {
     Map<String, Object> args = new HashMap();
 
     args.put("prepProperties", buildPrepPropertiesInfo());
-    args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(ssUri));
     args.put("callbackInfo", buildCallbackInfo());
 
-    Response response = given().contentType(ContentType.JSON)
-            .accept(ContentType.JSON)
-            .when()
-            .content(args)
-            .post(BASE_URL + "/run")
-            .then()
-            .log().all()
-            .statusCode(HttpStatus.SC_OK)
-            .extract()
-            .response();
+    if (dsUri != null) {
+      args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
+    } else {
+      assert tableInfo != null;
+      args.put("datasetInfo", buildDatasetInfo(tableInfo, ruleStrings));
+    }
 
-    assertEquals(response.path("result"), "SUCCEEDED");
+    if (ssUri != null) {
+      args.put("snapshotInfo", buildSnapshotInfo(ssUri));
+    } else {
+      assert stagingDbSnapshotInfo != null;
+      args.put("snapshotInfo", buildSnapshotInfo(stagingDbSnapshotInfo));
+    }
 
-    System.out.println(response.toString());
-  }
+    if (useRestAssure) {
+      Response response = given().contentType(ContentType.JSON)
+              .accept(ContentType.JSON)
+              .when()
+              .content(args)
+              .post(BASE_URL + "/run")
+              .then()
+              .log().all()
+              .statusCode(HttpStatus.SC_OK)
+              .extract()
+              .response();
+      assertEquals(response.path("result"), "SUCCEEDED");
+      System.out.println(response.toString());
+      return;
+    }
 
-  // This is a test for real use of the API of prep-spark-engine,
-  // because the actual call method is a common HTTP POST request, not REST Assured test suite.
-  static void testFileToCsvHttpURLConnection(String dsUri, List<String> ruleStrings, String ssUri) throws IOException {
-    Map<String, Object> args = new HashMap();
-
-    args.put("prepProperties", buildPrepPropertiesInfo());
-    args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(ssUri));
-    args.put("callbackInfo", buildCallbackInfo());
-
+    // This is a test for real use of the API of discovery-spark-engine,
+    // because the actual call method is a common HTTP POST request, not REST Assured test suite.
     URL url = new URL(BASE_URL + "/run");
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
@@ -204,106 +238,24 @@ public class TestUtil {
     }
   }
 
-  static void testFileToJson(String dsUri, List<String> ruleStrings, String ssUri) {
-    Map<String, Object> args = new HashMap();
-
-    args.put("prepProperties", buildPrepPropertiesInfo());
-    args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(ssUri));
-    args.put("callbackInfo", buildCallbackInfo());
-
-    Response response = given().contentType(ContentType.JSON)
-            .accept(ContentType.JSON)
-            .when()
-            .content(args)
-            .post(BASE_URL + "/run")
-            .then()
-            .log().all()
-            .statusCode(HttpStatus.SC_OK)
-            .extract()
-            .response();
-
-    assertEquals(response.path("result"), "SUCCEEDED");
-
-    System.out.println(response.toString());
+  static void testFileToFile(String dsUri, List<String> ruleStrings, String ssUri) throws IOException {
+    testToSucceed(ruleStrings, dsUri, ssUri, null, null, true);
   }
 
-  public static class TableInfo {
-
-    public String dbName;
-    public String tblName;
-
-    public TableInfo() {
-    }
-
-    public TableInfo(String dbName, String tblName) {
-      this.dbName = dbName;
-      this.tblName = tblName;
-    }
+  // This is a test for real use of the API of discovery-spark-engine,
+  // because the actual call method is a common HTTP POST request, not REST Assured test suite.
+  static void testFileToCsvHttpURLConnection(String dsUri, List<String> ruleStrings, String ssUri) throws IOException {
+    testToSucceed(ruleStrings, dsUri, ssUri, null, null, false);
   }
 
-  public static class StagingDbSnapshotInfo {
-
-    TableInfo tableInfo;
-
-    // TO BE ADDED (like compression, partition, append mode, ...)
-
-    public StagingDbSnapshotInfo() {
-    }
-
-    public StagingDbSnapshotInfo(String dbName, String tblName) {
-      tableInfo = new TableInfo(dbName, tblName);
-    }
+  static void testFileToHive(String dsUri, List<String> ruleStrings, StagingDbSnapshotInfo stagingDbSnapshotInfo)
+          throws IOException {
+    testToSucceed(ruleStrings, dsUri, null, null, stagingDbSnapshotInfo, true);
   }
 
-  static void testFileToHive(String dsUri, List<String> ruleStrings,
-          StagingDbSnapshotInfo stagingDbSnapshotInfo) {
-    Map<String, Object> args = new HashMap();
-
-    args.put("prepProperties", buildPrepPropertiesInfo());
-    args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(stagingDbSnapshotInfo));
-    args.put("callbackInfo", buildCallbackInfo());
-
-    Response response = given().contentType(ContentType.JSON)
-            .accept(ContentType.JSON)
-            .when()
-            .content(args)
-            .post(BASE_URL + "/run")
-            .then()
-            .log().all()
-            .statusCode(HttpStatus.SC_OK)
-            .extract()
-            .response();
-
-    assertEquals(response.path("result"), "SUCCEEDED");
-
-    System.out.println(response.toString());
-  }
-
-  static void testHiveToHive(TableInfo tableInfo, List<String> ruleStrings,
-          StagingDbSnapshotInfo stagingDbSnapshotInfo) {
-    Map<String, Object> args = new HashMap();
-
-    args.put("prepProperties", buildPrepPropertiesInfo());
-    args.put("datasetInfo", buildDatasetInfo(tableInfo, ruleStrings));
-    args.put("snapshotInfo", buildSnapshotInfo(stagingDbSnapshotInfo));
-    args.put("callbackInfo", buildCallbackInfo());
-
-    Response response = given().contentType(ContentType.JSON)
-            .accept(ContentType.JSON)
-            .when()
-            .content(args)
-            .post(BASE_URL + "/run")
-            .then()
-            .log().all()
-            .statusCode(HttpStatus.SC_OK)
-            .extract()
-            .response();
-
-    assertEquals(response.path("result"), "SUCCEEDED");
-
-    System.out.println(response.toString());
+  static void testHiveToHive(TableInfo tableInfo, List<String> ruleStrings, StagingDbSnapshotInfo stagingDbSnapshotInfo)
+          throws IOException {
+    testToSucceed(ruleStrings, null, null, tableInfo, stagingDbSnapshotInfo, true);
   }
 }
 

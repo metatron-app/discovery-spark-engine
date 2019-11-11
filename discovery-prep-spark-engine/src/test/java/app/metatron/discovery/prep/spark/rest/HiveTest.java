@@ -16,6 +16,7 @@ package app.metatron.discovery.prep.spark.rest;
 
 import app.metatron.discovery.prep.spark.rest.TestUtil.StagingDbSnapshotInfo;
 import app.metatron.discovery.prep.spark.rest.TestUtil.TableInfo;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.BeforeClass;
@@ -25,7 +26,7 @@ import org.junit.Test;
 public class HiveTest {
 
   @BeforeClass    // All test-cases in this class depend on table "test_rename"
-  public static void testRename() {
+  public static void testRename() throws IOException {
     // JSON -> Hive
     String dsUri = TestUtil.getResourcePath("json/crime.json");
 
@@ -53,7 +54,7 @@ public class HiveTest {
   }
 
   @Test
-  public void testKeep() {
+  public void testKeep() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("keep row: `location` == 'NY'");
@@ -65,7 +66,7 @@ public class HiveTest {
   }
 
   @Test
-  public void testMove() {
+  public void testMove() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("move col: `robbery`, `aggravated_assault`, `burglary` before: `total_crime`");
@@ -78,7 +79,7 @@ public class HiveTest {
   }
 
   @Test
-  public void testSort() {
+  public void testSort() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("sort order: `location`, `dt`");
@@ -91,7 +92,7 @@ public class HiveTest {
   }
 
   @Test
-  public void testSplit() {
+  public void testSplit() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("split col: `shipping_result`, `city` on: ' ' limit: 1");
@@ -103,7 +104,7 @@ public class HiveTest {
   }
 
   @Test
-  public void testMerge() {
+  public void testMerge() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("split col: `shipping_result`, `city` on: ' ' limit: 1");

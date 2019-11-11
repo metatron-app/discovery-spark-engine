@@ -29,7 +29,7 @@ public class BasicTest {
   }
 
   @Test
-  public void testRename() {
+  public void testRename() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("rename col: column1 to: 'new_colname'");
@@ -37,7 +37,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -53,7 +53,7 @@ public class BasicTest {
   }
 
   @Test
-  public void testHeader() {
+  public void testHeader() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -62,11 +62,11 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testWeirdHeader() {
+  public void testWeirdHeader() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 5");
@@ -74,11 +74,11 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testDrop() {
+  public void testDrop() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header");
@@ -87,11 +87,11 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testKeep() {
+  public void testKeep() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header");
@@ -100,11 +100,11 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testDelete() {
+  public void testDelete() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header");
@@ -113,11 +113,11 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   //  @Test
-  public void testLargeFile() {
+  public void testLargeFile() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("rename col: _c0 to: new_colname");
@@ -125,7 +125,7 @@ public class BasicTest {
     String dsUri = "/tmp/dataprep/uploads/bigfile.csv";
     String ssUri = "/tmp/dataprep/snapshots/bigfile.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 }
 

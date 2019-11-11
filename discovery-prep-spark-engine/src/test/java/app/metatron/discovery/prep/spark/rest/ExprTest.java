@@ -14,6 +14,7 @@
 
 package app.metatron.discovery.prep.spark.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -22,7 +23,7 @@ import org.junit.Test;
 public class ExprTest {
 
   @Test
-  public void testSet() {
+  public void testSet() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -32,11 +33,11 @@ public class ExprTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testDuplicate() {
+  public void testDuplicate() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -46,11 +47,11 @@ public class ExprTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testDerive() {
+  public void testDerive() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -60,11 +61,11 @@ public class ExprTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testReplaceLiteral() {
+  public void testReplaceLiteral() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -73,11 +74,11 @@ public class ExprTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testReplaceRegExp() {
+  public void testReplaceRegExp() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -86,11 +87,11 @@ public class ExprTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
-  public void testReplaceRegExpGroup() {
+  public void testReplaceRegExpGroup() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
@@ -99,6 +100,6 @@ public class ExprTest {
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 }

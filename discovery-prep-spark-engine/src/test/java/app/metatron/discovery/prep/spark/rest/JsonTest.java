@@ -14,6 +14,7 @@
 
 package app.metatron.discovery.prep.spark.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -22,7 +23,7 @@ import org.junit.Test;
 public class JsonTest {
 
   @Test
-  public void testRename() {
+  public void testRename() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("rename col: Date to: 'dt'");
@@ -31,11 +32,11 @@ public class JsonTest {
     String dsUri = TestUtil.getResourcePath("json/crime.json");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsv(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
 
     // JSON -> JSON
     ssUri = "/tmp/dataprep/snapshots/crime.snapshot.json";
-    TestUtil.testFileToJson(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 }
 
