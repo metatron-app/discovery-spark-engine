@@ -17,11 +17,13 @@ package app.metatron.discovery.prep.spark.rest;
 import static com.jayway.restassured.RestAssured.given;
 import static org.testng.Assert.assertEquals;
 
+import app.metatron.discovery.prep.spark.util.SparkUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -31,13 +33,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.spark.sql.DataFrameReader;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
 
 public class TestUtil {
 
   public static String BASE_URL = "http://localhost:5300";
 
-  static String getResourcePath(String relPath, boolean fromHdfs) {
+  public static String getResourcePath(String relPath, boolean fromHdfs) {
     if (fromHdfs) {
       throw new IllegalArgumentException("HDFS not supported yet");
     }
@@ -45,7 +50,7 @@ public class TestUtil {
     return (new File(url.getFile())).getAbsolutePath();
   }
 
-  static String getResourcePath(String relPath) {
+  public static String getResourcePath(String relPath) {
     return getResourcePath(relPath, false);
   }
 
@@ -93,8 +98,7 @@ public class TestUtil {
     }
   }
 
-
-  static Map<String, Object> buildPrepPropertiesInfo() {
+  private static Map<String, Object> buildPrepPropertiesInfo() {
     Map<String, Object> prepPropertiesInfo = new HashMap();
 
     String uri = "thrift://localhost:9083";
@@ -110,12 +114,20 @@ public class TestUtil {
     return prepPropertiesInfo;
   }
 
-  static Map<String, Object> buildDatasetInfo(String ssUri, String delimiter, List<String> ruleStrings,
+  public static Map<String, Object> buildDatasetInfoWithDsId(String dsUri, List<String> ruleStrings,
+          Integer manualColumnCount, String dsId) {
+    Map<String, Object> datasetInfo = buildDatasetInfo(dsUri, ",", ruleStrings, manualColumnCount);
+    datasetInfo.put("origTeddyDsId", dsId);
+
+    return datasetInfo;
+  }
+
+  public static Map<String, Object> buildDatasetInfo(String dsUri, String delimiter, List<String> ruleStrings,
           Integer manualColumnCount) {
     Map<String, Object> datasetInfo = new HashMap();
 
     datasetInfo.put("importType", "URI");
-    datasetInfo.put("storedUri", ssUri);
+    datasetInfo.put("storedUri", dsUri);
     datasetInfo.put("delimiter", delimiter);
     datasetInfo.put("ruleStrings", ruleStrings);
     datasetInfo.put("manualColumnCount", manualColumnCount);
@@ -123,7 +135,7 @@ public class TestUtil {
     return datasetInfo;
   }
 
-  static Map<String, Object> buildDatasetInfo(TableInfo tableInfo, List<String> ruleStrings) {
+  private static Map<String, Object> buildDatasetInfo(TableInfo tableInfo, List<String> ruleStrings) {
     Map<String, Object> datasetInfo = new HashMap();
 
     datasetInfo.put("importType", "STAGING_DB");
@@ -134,7 +146,7 @@ public class TestUtil {
     return datasetInfo;
   }
 
-  static Map<String, Object> buildSnapshotInfo(String absPath) {
+  private static Map<String, Object> buildSnapshotInfo(String absPath) {
     Map<String, Object> snapshotInfo = new HashMap();
 
     snapshotInfo.put("ssId", "TestUtil");
@@ -144,7 +156,7 @@ public class TestUtil {
     return snapshotInfo;
   }
 
-  static Map<String, Object> buildSnapshotInfo(StagingDbSnapshotInfo hiveSnapshotInfo) {
+  private static Map<String, Object> buildSnapshotInfo(StagingDbSnapshotInfo hiveSnapshotInfo) {
     Map<String, Object> snapshotInfo = new HashMap();
 
     snapshotInfo.put("ssId", "TestUtil");
@@ -155,7 +167,7 @@ public class TestUtil {
     return snapshotInfo;
   }
 
-  static Map<String, Object> buildCallbackInfo() {
+  private static Map<String, Object> buildCallbackInfo() {
     Map<String, Object> callbackInfo = new HashMap();
 
     callbackInfo.put("port", "0");
@@ -164,28 +176,7 @@ public class TestUtil {
     return callbackInfo;
   }
 
-  static private void testToSucceed(List<String> ruleStrings, String dsUri, String ssUri, TableInfo tableInfo,
-          StagingDbSnapshotInfo stagingDbSnapshotInfo, boolean useRestAssure, Integer manualColumnCount)
-          throws IOException {
-    Map<String, Object> args = new HashMap();
-
-    args.put("prepProperties", buildPrepPropertiesInfo());
-    args.put("callbackInfo", buildCallbackInfo());
-
-    if (dsUri != null) {
-      args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings, manualColumnCount));
-    } else {
-      assert tableInfo != null;
-      args.put("datasetInfo", buildDatasetInfo(tableInfo, ruleStrings));
-    }
-
-    if (ssUri != null) {
-      args.put("snapshotInfo", buildSnapshotInfo(ssUri));
-    } else {
-      assert stagingDbSnapshotInfo != null;
-      args.put("snapshotInfo", buildSnapshotInfo(stagingDbSnapshotInfo));
-    }
-
+  private static void testToSucceedInternal(Map<String, Object> args, boolean useRestAssure) throws IOException {
     if (useRestAssure) {
       Response response = given().contentType(ContentType.JSON)
               .accept(ContentType.JSON)
@@ -240,29 +231,82 @@ public class TestUtil {
     }
   }
 
-  static void testFileToFile(String dsUri, List<String> ruleStrings, String ssUri) throws IOException {
+  private static void testToSucceed(List<String> ruleStrings, String dsUri, String ssUri, TableInfo tableInfo,
+          StagingDbSnapshotInfo stagingDbSnapshotInfo, boolean useRestAssure, Integer manualColumnCount)
+          throws IOException {
+    Map<String, Object> args = new HashMap();
+
+    args.put("prepProperties", buildPrepPropertiesInfo());
+    args.put("callbackInfo", buildCallbackInfo());
+
+    if (dsUri != null) {
+      args.put("datasetInfo", buildDatasetInfo(dsUri, ",", ruleStrings, manualColumnCount));
+    } else {
+      assert tableInfo != null;
+      args.put("datasetInfo", buildDatasetInfo(tableInfo, ruleStrings));
+    }
+
+    if (ssUri != null) {
+      args.put("snapshotInfo", buildSnapshotInfo(ssUri));
+    } else {
+      assert stagingDbSnapshotInfo != null;
+      args.put("snapshotInfo", buildSnapshotInfo(stagingDbSnapshotInfo));
+    }
+
+    testToSucceedInternal(args, useRestAssure);
+  }
+
+  public static void testFileToFileWithCustomDsInfo(Map<String, Object> dsInfo, String ssUri) throws IOException {
+    Map<String, Object> args = new HashMap();
+
+    args.put("prepProperties", buildPrepPropertiesInfo());
+    args.put("callbackInfo", buildCallbackInfo());
+    args.put("datasetInfo", dsInfo);
+
+    // Custom dataset test is limited to file snapshot and Rest assue, for simplicity.)
+    assert ssUri != null;
+    args.put("snapshotInfo", buildSnapshotInfo(ssUri));
+
+    testToSucceedInternal(args, true);
+  }
+
+  public static void testFileToFile(String dsUri, List<String> ruleStrings, String ssUri) throws IOException {
     testToSucceed(ruleStrings, dsUri, ssUri, null, null, true, null);
   }
 
-  static void testFileToFile(String dsUri, List<String> ruleStrings, String ssUri, Integer manualColumnCount)
+  public static void testFileToFile(String dsUri, List<String> ruleStrings, String ssUri, Integer manualColumnCount)
           throws IOException {
     testToSucceed(ruleStrings, dsUri, ssUri, null, null, true, manualColumnCount);
   }
 
   // This is a test for real use of the API of discovery-spark-engine,
   // because the actual call method is a common HTTP POST request, not REST Assured test suite.
-  static void testFileToCsvHttpURLConnection(String dsUri, List<String> ruleStrings, String ssUri) throws IOException {
-    testToSucceed(ruleStrings, dsUri, ssUri, null, null, false, null);
+  public static void testFileToCsvHttpURLConnection(String dsUri, List<String> ruleStrings, String ssUri,
+          int manualColumnCount) throws IOException {
+    testToSucceed(ruleStrings, dsUri, ssUri, null, null, false, manualColumnCount);
   }
 
-  static void testFileToHive(String dsUri, List<String> ruleStrings, StagingDbSnapshotInfo stagingDbSnapshotInfo)
+  public static void testFileToHive(String dsUri, List<String> ruleStrings, StagingDbSnapshotInfo stagingDbSnapshotInfo)
           throws IOException {
     testToSucceed(ruleStrings, dsUri, null, null, stagingDbSnapshotInfo, true, null);
   }
 
-  static void testHiveToHive(TableInfo tableInfo, List<String> ruleStrings, StagingDbSnapshotInfo stagingDbSnapshotInfo)
-          throws IOException {
+  public static void testHiveToHive(TableInfo tableInfo, List<String> ruleStrings,
+          StagingDbSnapshotInfo stagingDbSnapshotInfo) throws IOException {
     testToSucceed(ruleStrings, null, null, tableInfo, stagingDbSnapshotInfo, true, null);
+  }
+
+  public static int getColCntByFirstLine(String uri) throws IOException {
+    File file = new File(uri);
+    FileReader reader = new FileReader(file);
+    BufferedReader br = new BufferedReader(reader);
+
+    String line = br.readLine();
+    if (line == null) {
+      return 1;
+    }
+
+    return line.split(",").length;
   }
 }
 

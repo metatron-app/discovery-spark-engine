@@ -17,6 +17,7 @@ package app.metatron.discovery.prep.spark.rest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.junit.Test;
 
 
@@ -37,7 +38,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, TestUtil.getColCntByFirstLine(dsUri));
   }
 
   @Test
@@ -49,7 +50,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToCsvHttpURLConnection(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToCsvHttpURLConnection(dsUri, ruleStrings, ssUri, TestUtil.getColCntByFirstLine(dsUri));
   }
 
   @Test
@@ -74,7 +75,7 @@ public class BasicTest {
     String dsUri = TestUtil.getResourcePath("csv/crime.csv");
     String ssUri = "/tmp/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, TestUtil.getColCntByFirstLine(dsUri));
   }
 
   @Test
@@ -126,6 +127,30 @@ public class BasicTest {
     String ssUri = "/tmp/dataprep/snapshots/dynamic_colcnt.snapshot.csv";
 
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, 6);
+  }
+
+//  @Test
+  public void testUnion() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("union dataset2: 'ds2', 'ds3'");
+
+    String dsUri1 = TestUtil.getResourcePath("csv/sales_2011_01.txt");
+    String dsUri2 = TestUtil.getResourcePath("csv/sales_2011_02.txt");
+    String dsUri3 = TestUtil.getResourcePath("csv/sales_2011_03.txt");
+
+    int colCnt = TestUtil.getColCntByFirstLine(dsUri1);
+    Map<String, Object> dsInfo1 = TestUtil.buildDatasetInfoWithDsId(dsUri1, ruleStrings, colCnt, "ds1");
+    Map<String, Object> dsInfo2 = TestUtil.buildDatasetInfoWithDsId(dsUri2, new ArrayList(), colCnt, "ds2");
+    Map<String, Object> dsInfo3 = TestUtil.buildDatasetInfoWithDsId(dsUri3, new ArrayList(), colCnt, "ds3");
+
+    List<Map<String, Object>> dsList = new ArrayList();
+    dsList.add(dsInfo2);
+    dsList.add(dsInfo3);
+    dsInfo1.put("upstreamDatasetInfos", dsList);
+
+    String ssUri = "/tmp/dataprep/snapshots/union.csv";
+    TestUtil.testFileToFileWithCustomDsInfo(dsInfo1, ssUri);
   }
 
   //  @Test

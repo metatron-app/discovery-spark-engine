@@ -173,7 +173,7 @@ public class DiscoveryPrepSparkEngineService {
           throws IOException, URISyntaxException, AnalysisException {
     String dsId = (String) dsInfo.get("origTeddyDsId");
 
-    // We don't need to convert dataset like Embedded engine.
+    // We don't need to convert dataset into a full dataset. (cf. Embedded engine)
     List<String> ruleStrings = (List<String>) dsInfo.get("ruleStrings");
     boolean header = removeUnusedRules(ruleStrings);
     Dataset<Row> df = createStage0(dsInfo, header);

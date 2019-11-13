@@ -116,9 +116,13 @@ public class FileService {
                 .format("CSV")
                 .option("delimiter", delimiter);
 
-        if (header || columnCount == null) {  // columnCount null is used in test codes
+        if (header) {  // columnCount null is used in test codes
           return reader.option("header", header).load(storedUri).limit(limitRows);
         }
+
+        // A CSV dataset should be headered or set column count manually.
+        // Because we don't want to see _c0, _c1 even just in the beginning.
+        assert columnCount != null;
 
         List<StructField> fields = new ArrayList();
         for (int i = 1; i <= columnCount; i++) {

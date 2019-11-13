@@ -31,7 +31,7 @@ public class HdfsTest {
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, 13);
   }
 
   @Test
@@ -56,7 +56,7 @@ public class HdfsTest {
     String dsUri = "hdfs://localhost:9000/dataprep/uploads/crime.csv";
     String ssUri = "hdfs://localhost:9000/dataprep/snapshots/crime.snapshot.csv";
 
-    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, 13);
   }
 
   @Test
