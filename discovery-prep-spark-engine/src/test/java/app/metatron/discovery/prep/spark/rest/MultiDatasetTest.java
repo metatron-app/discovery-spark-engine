@@ -46,5 +46,62 @@ public class MultiDatasetTest {
     String ssUri = "/tmp/dataprep/snapshots/union.csv";
     TestUtil.testFileToFileWithCustomDsInfo(dsInfo1, ssUri);
   }
+
+  @Test
+  public void testJoinInner() throws IOException {
+    List<String> ruleStringsForA = new ArrayList();
+    List<String> ruleStringsForB = new ArrayList();
+
+    String dsUriA = TestUtil.getResourcePath("csv/A.txt");
+    String dsUriB = TestUtil.getResourcePath("csv/B.txt");
+
+    ruleStringsForA.add("header");
+    ruleStringsForA.add("join leftSelectCol: id, name rightSelectCol: id, occupation condition: id=id"
+            + " joinType: 'outer' dataset2: 'dsB'");
+
+    ruleStringsForB.add("header");
+
+    int colCnt = TestUtil.getColCntByFirstLine(dsUriA);
+    Map<String, Object> dsInfoA = TestUtil.buildDatasetInfoWithDsId(dsUriA, ruleStringsForA, colCnt, "dsA");
+    Map<String, Object> dsInfoB = TestUtil.buildDatasetInfoWithDsId(dsUriB, ruleStringsForB, colCnt, "dsB");
+
+    List<Map<String, Object>> dsList = new ArrayList();
+    dsList.add(dsInfoB);
+    dsInfoA.put("upstreamDatasetInfos", dsList);
+
+    String ssUri = "/tmp/dataprep/snapshots/join1.csv";
+    TestUtil.testFileToFileWithCustomDsInfo(dsInfoA, ssUri);
+  }
+//   "join leftSelectCol: id,`id_1_1`,`id_1`,`name` rightSelectCol: `id`,`id_1`,`id_1_1`,`occupation` condition: `id`=`id` && `id_1_1`=`id_1_1` && `id_1`=`id_1` joinType: 'outer' dataset2: 'db6f7937-b6b4-4b4c-a5e4-2a324318bc85'\"\n");
+
+  @Test
+  public void testJoinOuterAndMultiCol() throws IOException {
+    List<String> ruleStringsForA = new ArrayList();
+    List<String> ruleStringsForB = new ArrayList();
+
+    String dsUriA = TestUtil.getResourcePath("csv/A.txt");
+    String dsUriB = TestUtil.getResourcePath("csv/B.txt");
+
+    ruleStringsForA.add("header");
+    ruleStringsForA.add("derive value: id as id2");
+    ruleStringsForA.add("join leftSelectCol: id, id2, `name` rightSelectCol: occupation condition: id=id && id2=id2"
+            + " joinType: 'outer' dataset2: 'dsB'");
+
+    //   "join leftSelectCol: id,`id_1_1`,`id_1`,`name` rightSelectCol: `id`,`id_1`,`id_1_1`,`occupation` condition: `id`=`id` && `id_1_1`=`id_1_1` && `id_1`=`id_1` joinType: 'outer' dataset2: 'db6f7937-b6b4-4b4c-a5e4-2a324318bc85'\"\n");
+
+    ruleStringsForB.add("header");
+    ruleStringsForB.add("derive value: id as id2");
+
+    int colCnt = TestUtil.getColCntByFirstLine(dsUriA);
+    Map<String, Object> dsInfoA = TestUtil.buildDatasetInfoWithDsId(dsUriA, ruleStringsForA, colCnt, "dsA");
+    Map<String, Object> dsInfoB = TestUtil.buildDatasetInfoWithDsId(dsUriB, ruleStringsForB, colCnt, "dsB");
+
+    List<Map<String, Object>> dsList = new ArrayList();
+    dsList.add(dsInfoB);
+    dsInfoA.put("upstreamDatasetInfos", dsList);
+
+    String ssUri = "/tmp/dataprep/snapshots/join2.csv";
+    TestUtil.testFileToFileWithCustomDsInfo(dsInfoA, ssUri);
+  }
 }
 

@@ -14,7 +14,6 @@
 
 package app.metatron.discovery.prep.spark.rule;
 
-import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.util.List;
 import org.apache.spark.sql.AnalysisException;

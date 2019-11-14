@@ -182,8 +182,8 @@ public class PrepRule {
     } else if (expr instanceof BinaryNumericOpExprBase) {
       BinaryNumericOpExprBase binExpr = (BinaryNumericOpExprBase) expr;
       return new StrExpResult(
-          stringifyExpr(binExpr.getLeft()).str + " " + binExpr.getOp() + " " + stringifyExpr(
-              binExpr.getRight()).str);
+              stringifyExpr(binExpr.getLeft()).str + " " + binExpr.getOp() + " " + stringifyExpr(
+                      binExpr.getRight()).str);
     } else if (expr instanceof UnaryNotExpr) {
       UnaryNotExpr notExpr = (UnaryNotExpr) expr;
       return new StrExpResult("!" + stringifyExpr(notExpr.getChild()));

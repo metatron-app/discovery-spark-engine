@@ -16,11 +16,8 @@ package app.metatron.discovery.prep.spark.rule;
 
 import app.metatron.discovery.prep.parser.preparation.rule.Derive;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
-import app.metatron.discovery.prep.parser.preparation.rule.Set;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;

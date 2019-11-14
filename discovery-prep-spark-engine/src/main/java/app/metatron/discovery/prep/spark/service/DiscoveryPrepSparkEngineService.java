@@ -234,7 +234,7 @@ public class DiscoveryPrepSparkEngineService {
   }
 
   static public List<String> getSlaveDsIds(String ruleString) {
-    Rule rule = new RuleVisitorParser().parse(ruleString);
+    Rule rule = (new RuleVisitorParser()).parse(ruleString);
 
     switch (rule.getName()) {
       case "join":
