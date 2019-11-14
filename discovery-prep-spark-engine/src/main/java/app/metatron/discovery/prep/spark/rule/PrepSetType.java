@@ -62,12 +62,22 @@ public class PrepSetType extends PrepRule {
                     colName);
           }
         default:
-          sql = String.format("%sCAST(`%s` AS %s) AS `%s`, ", sql, colName, toType, colName);
+          sql = String.format("%sCAST(`%s` AS %s) AS `%s`, ", sql, colName, getPhysicalType(toType), colName);
           break;
       }
     }
     sql = sql.substring(0, sql.length() - 2) + " FROM temp";
 
     return SparkUtil.getSession().sql(sql);
+  }
+
+  private String getPhysicalType(String toType) {
+    switch (toType) {
+      case "map":
+      case "array":
+        return "string";
+      default:
+        return toType;
+    }
   }
 }
