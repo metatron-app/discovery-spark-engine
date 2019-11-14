@@ -114,6 +114,7 @@ public class FileService {
         String delimiter = (String) datasetInfo.get("delimiter");
         DataFrameReader reader = SparkUtil.getSession().read()
                 .format("CSV")
+                .option("escape", "\"")
                 .option("delimiter", delimiter);
 
         if (header) {  // columnCount null is used in test codes
