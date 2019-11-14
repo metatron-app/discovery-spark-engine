@@ -38,5 +38,30 @@ public class JsonTest {
     ssUri = "/tmp/dataprep/snapshots/crime.snapshot.json";
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
-}
 
+  @Test
+  public void testUnnest() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("settype col: `column2` type: map");
+    ruleStrings.add("unnest col: `column1` into: MAP idx: 'A'");
+
+    String dsUri = TestUtil.getResourcePath("csv/json_in_column.csv.txt");
+    String ssUri = "/tmp/dataprep/snapshots/unnest.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, TestUtil.getColCntByFirstLine(dsUri));
+  }
+
+  @Test
+  public void testUnnestAll() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("settype col: `column2` type: map");
+    ruleStrings.add("unnest col: `column2` into: MAP idx: ");   // UI sends like this. I don't like it.
+
+    String dsUri = TestUtil.getResourcePath("csv/json_in_column.csv.txt");
+    String ssUri = "/tmp/dataprep/snapshots/unnest_all.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, 3);  // Need to implement escaping to use getColCntByFirstLine()
+  }
+}

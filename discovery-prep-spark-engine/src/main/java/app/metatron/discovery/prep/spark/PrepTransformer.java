@@ -31,7 +31,9 @@ import app.metatron.discovery.prep.spark.rule.PrepSetType;
 import app.metatron.discovery.prep.spark.rule.PrepSort;
 import app.metatron.discovery.prep.spark.rule.PrepSplit;
 import app.metatron.discovery.prep.spark.rule.PrepUnion;
+import app.metatron.discovery.prep.spark.rule.PrepUnnest;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
+import java.io.IOException;
 import java.util.List;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
@@ -53,7 +55,7 @@ public class PrepTransformer {
   }
 
   public Dataset<Row> applyRule(Dataset<Row> df, String ruleString, List<Dataset<Row>> slaveDfs)
-          throws AnalysisException {
+          throws AnalysisException, IOException {
     Rule rule = parser.parse(ruleString);
 
     switch (rule.getName()) {
@@ -89,6 +91,8 @@ public class PrepTransformer {
         return (new PrepUnion()).transform(df, slaveDfs);
       case "join":
         return (new PrepJoin()).transform(df, rule, slaveDfs);
+      case "unnest":
+        return (new PrepUnnest()).transform(df, rule);
     }
 
     LOGGER.error("Unsupported rule: " + ruleString);
