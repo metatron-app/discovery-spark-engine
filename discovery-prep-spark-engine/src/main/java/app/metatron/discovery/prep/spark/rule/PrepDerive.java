@@ -19,6 +19,7 @@ import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.parser.preparation.rule.Set;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
@@ -45,6 +46,10 @@ public class PrepDerive extends PrepRule {
       }
     }
 
+    while (contains(colNames, as)) {
+      as = as + "_1";
+    }
+
     String sql = "SELECT ";
     for (int i = 0; i < colNames.length; i++) {
       String colName = colNames[i];
@@ -57,5 +62,14 @@ public class PrepDerive extends PrepRule {
     sql = sql.substring(0, sql.length() - 2) + " FROM temp";
 
     return SparkUtil.getSession().sql(sql);
+  }
+
+  private boolean contains(String[] arr, String str) {
+    for (String s : arr) {
+      if (s.equals(str)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
