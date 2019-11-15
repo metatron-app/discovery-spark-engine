@@ -107,9 +107,9 @@ public class HiveTest {
   public void testMerge() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
-    ruleStrings.add("split col: `shipping_result`, `city` on: ' ' limit: 1");
-    ruleStrings.add("merge col: split_city1, split_city2, split_shipping_result2 with: '-' as: 'result_per_cities'");
-    ruleStrings.add("merge col: division, latitude, longitude with: '//' as: loc");
+    ruleStrings.add("split col: `result`, `city` on: ' ' limit: 1");
+    ruleStrings.add("merge col: split_city1, split_city2, split_result2 with: '-' as: 'result_per_cities'");
+    ruleStrings.add("merge col: region, lat, lon with: '//' as: loc");
 
     TableInfo tableInfo = new TableInfo("default", "test_sales");
     StagingDbSnapshotInfo snapshotInfo = new StagingDbSnapshotInfo("default", "test_merge");

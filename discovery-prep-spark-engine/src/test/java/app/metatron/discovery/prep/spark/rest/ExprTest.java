@@ -27,8 +27,8 @@ public class ExprTest {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
-    ruleStrings.add("settype col: `sale_price` type: Double");
-    ruleStrings.add("set col: `sale_price` value: sale_price * 100");
+    ruleStrings.add("settype col: `price` type: Double");
+    ruleStrings.add("set col: `price` value: price * 100");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
@@ -41,8 +41,8 @@ public class ExprTest {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
-    ruleStrings.add("settype col: `sale_price` type: Double");
-    ruleStrings.add("derive value: `sale_price` as: `duplicated_sale_price`");
+    ruleStrings.add("settype col: `price` type: Double");
+    ruleStrings.add("derive value: `price` as: `duplicated_sale_price`");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
@@ -55,8 +55,8 @@ public class ExprTest {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
-    ruleStrings.add("settype col: `sale_price` type: Double");
-    ruleStrings.add("derive value: `sale_price` * 100 as: after_inflation");
+    ruleStrings.add("settype col: `price` type: Double");
+    ruleStrings.add("derive value: `price` * 100 as: after_inflation");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
@@ -72,7 +72,7 @@ public class ExprTest {
     ruleStrings.add("replace col: `business`, `base` on: 'Office' with: 'Desk'");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
-    String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+    String ssUri = "/tmp/dataprep/snapshots/replace_literal.csv";
 
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
@@ -85,7 +85,7 @@ public class ExprTest {
     ruleStrings.add("replace col: `due` on: /\\\\d/ with: 'x'");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
-    String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+    String ssUri = "/tmp/dataprep/snapshots/replace_regex.csv";
 
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
@@ -98,7 +98,33 @@ public class ExprTest {
     ruleStrings.add("replace col: `due` on: /(\\\\d+).*(\\\\d+).*(\\\\d+).*/ with: '$1-$2-$3'");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
-    String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
+    String ssUri = "/tmp/dataprep/snapshots/replace_regex_group.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+  }
+
+//  @Test
+  public void testExtractLiteral() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("extract col: `business`, `base` on: 'Office' limit: 1 with: 'Desk'");
+
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
+    String ssUri = "/tmp/dataprep/snapshots/replace_literal.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+  }
+
+//  @Test
+  public void testExtractRegExp() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("replace col: `due` on: /\\\\d/ with: 'x'");
+
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
+    String ssUri = "/tmp/dataprep/snapshots/replace_regex.csv";
 
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }

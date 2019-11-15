@@ -190,6 +190,7 @@ public class DiscoveryPrepSparkEngineService {
     PrepTransformer transformer = new PrepTransformer();
     for (String ruleString : ruleStrings) {
       df = transformer.applyRule(df, ruleString, getSlaveDfs(ruleString));
+      df.show();
       callback.incrRuleCntDone(ssId);
     }
     cache.put(dsId, df);
