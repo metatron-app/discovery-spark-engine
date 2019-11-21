@@ -19,6 +19,7 @@ import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.spark.rule.PrepDelete;
 import app.metatron.discovery.prep.spark.rule.PrepDerive;
 import app.metatron.discovery.prep.spark.rule.PrepDrop;
+import app.metatron.discovery.prep.spark.rule.PrepExtract;
 import app.metatron.discovery.prep.spark.rule.PrepHeader;
 import app.metatron.discovery.prep.spark.rule.PrepJoin;
 import app.metatron.discovery.prep.spark.rule.PrepKeep;
@@ -83,6 +84,8 @@ public class PrepTransformer {
         return (new PrepDerive()).transform(df, rule);
       case "replace":
         return (new PrepReplace()).transform(df, rule);
+      case "extract":
+        return (new PrepExtract()).transform(df, rule);
       case "split":
         return (new PrepSplit()).transform(df, rule);
       case "merge":

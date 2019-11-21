@@ -14,6 +14,7 @@
 
 package app.metatron.discovery.prep.spark.util;
 
+import app.metatron.discovery.prep.spark.udf.RegexpExtractEx;
 import app.metatron.discovery.prep.spark.udf.SplitEx;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
@@ -59,12 +60,14 @@ public class SparkUtil {
       session = builder.getOrCreate();
 
       session.udf().register("split_ex", split_ex, DataTypes.StringType);
+      session.udf().register("regexp_extract_ex", regexp_extract_ex, DataTypes.StringType);
     }
 
     return session;
   }
 
   private static SplitEx split_ex = new SplitEx();
+  private static RegexpExtractEx regexp_extract_ex = new RegexpExtractEx();
 
   public static void stopSession() {
     if (session != null) {

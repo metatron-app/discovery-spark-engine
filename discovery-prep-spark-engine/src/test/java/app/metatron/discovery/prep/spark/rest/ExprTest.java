@@ -103,28 +103,28 @@ public class ExprTest {
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
-//  @Test
+  @Test
   public void testExtractLiteral() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
-    ruleStrings.add("extract col: `business`, `base` on: 'Office' limit: 1 with: 'Desk'");
+    ruleStrings.add("extract col: `business`, `base` on: 'Office' limit: 2");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
-    String ssUri = "/tmp/dataprep/snapshots/replace_literal.csv";
+    String ssUri = "/tmp/dataprep/snapshots/extract_literal.csv";
 
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
-//  @Test
+  @Test
   public void testExtractRegExp() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("header rownum: 1");
-    ruleStrings.add("replace col: `due` on: /\\\\d/ with: 'x'");
+    ruleStrings.add("extract col: `due` on: /\\\\d+/ limit: 10");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
-    String ssUri = "/tmp/dataprep/snapshots/replace_regex.csv";
+    String ssUri = "/tmp/dataprep/snapshots/extract_regex.csv";
 
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
