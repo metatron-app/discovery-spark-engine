@@ -16,12 +16,14 @@ package app.metatron.discovery.prep.spark.udf;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.spark.sql.api.java.UDF4;
+import org.apache.spark.sql.api.java.UDF3;
 
-public class RegexpExtractEx implements UDF4<String, String, Integer, String, String> {
+public class CountPatternEx implements UDF3<String, String, String, Integer> {
 
   @Override
-  public String call(String coldata, String patternStr, Integer nth, String quoteStr) throws Exception {
+  public Integer call(String coldata, String patternStr, String quoteStr) throws Exception {
+    int count = 0;
+
     if (org.apache.commons.lang3.StringUtils.countMatches(coldata, quoteStr) % 2 == 1) {
       coldata = coldata.substring(0, coldata.lastIndexOf(quoteStr));
     }
@@ -29,10 +31,8 @@ public class RegexpExtractEx implements UDF4<String, String, Integer, String, St
     Pattern pattern = Pattern.compile(patternStr);
     Matcher m = pattern.matcher(coldata);
     while (m.find()) {
-      if (nth-- == 0) {
-        return m.group();
-      }
+      count++;
     }
-    return null;
+    return count;
   }
 }

@@ -14,6 +14,7 @@
 
 package app.metatron.discovery.prep.spark.rule;
 
+import app.metatron.discovery.prep.parser.preparation.rule.expr.Constant;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Constant.ArrayExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Constant.StringExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expr;
@@ -26,6 +27,7 @@ import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier.IdentifierArrayExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier.IdentifierExpr;
+import app.metatron.discovery.prep.parser.preparation.rule.expr.RegularExpr;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -196,5 +198,59 @@ public class PrepRule {
     }
 
     return new StrExpResult(expr.toString());
+  }
+
+  private static String disableRegexSymbols(String str) {
+    String regExSymbols = "[\\<\\(\\[\\{\\\\\\^\\-\\=\\$\\!\\|\\]\\}\\)\\?\\*\\+\\.\\>]";
+    return str.replaceAll(regExSymbols, "\\\\$0");
+  }
+
+  private static String makeCaseInsensitive(String str) {
+    String ignorePatternStr = "";
+    for (int i = 0; i < str.length(); i++) {
+      String c = String.valueOf(str.charAt(i));
+
+      if (c.matches("[a-zA-Z]")) {
+        ignorePatternStr += "[" + c.toUpperCase() + c.toLowerCase() + "]";
+      } else {
+        ignorePatternStr += c;
+      }
+    }
+    return ignorePatternStr;
+  }
+
+  public static String modifyPatternStrWithQuote(String pattern, String quote) {
+    if (quote.isEmpty()) {
+      return pattern;
+    }
+    return String.format("%s(?=([^%s]*%s[^%s]*%s)*[^%s]*$)", pattern, quote, quote, quote, quote, quote);
+  }
+
+  public static String getPatternStr(Expression expr, Boolean ignoreCase) {
+    String patternStr;
+
+    if (expr instanceof Constant.StringExpr) {
+      patternStr = ((Constant.StringExpr) expr).getEscapedValue();
+      patternStr = disableRegexSymbols(patternStr);
+
+      if (ignoreCase != null && ignoreCase) {
+        patternStr = makeCaseInsensitive(patternStr);
+      }
+    } else if (expr instanceof RegularExpr) {
+      patternStr = ((RegularExpr) expr).getEscapedValue();
+    } else {
+      throw new IllegalArgumentException("illegal pattern type: " + expr);
+    }
+
+    return patternStr;
+  }
+
+  public static String getQuoteStr(Expression quote) {
+    if (quote == null) {
+      return "";
+    } else {
+      assert quote instanceof StringExpr : quote;
+      return ((StringExpr) quote).getEscapedValue();
+    }
   }
 }

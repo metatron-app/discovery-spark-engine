@@ -14,6 +14,8 @@
 
 package app.metatron.discovery.prep.spark.util;
 
+import app.metatron.discovery.prep.parser.preparation.rule.CountPattern;
+import app.metatron.discovery.prep.spark.udf.CountPatternEx;
 import app.metatron.discovery.prep.spark.udf.RegexpExtractEx;
 import app.metatron.discovery.prep.spark.udf.SplitEx;
 import org.apache.spark.sql.AnalysisException;
@@ -61,6 +63,7 @@ public class SparkUtil {
 
       session.udf().register("split_ex", split_ex, DataTypes.StringType);
       session.udf().register("regexp_extract_ex", regexp_extract_ex, DataTypes.StringType);
+      session.udf().register("count_pattern_ex", count_pattern_ex, DataTypes.IntegerType);
     }
 
     return session;
@@ -68,6 +71,7 @@ public class SparkUtil {
 
   private static SplitEx split_ex = new SplitEx();
   private static RegexpExtractEx regexp_extract_ex = new RegexpExtractEx();
+  private static CountPatternEx count_pattern_ex = new CountPatternEx();
 
   public static void stopSession() {
     if (session != null) {

@@ -117,6 +117,20 @@ public class ExprTest {
   }
 
   @Test
+  public void testExtractLiteralIgnoreCase() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("extract col: `city`, `state` on: 'sa' limit: 2 ignoreCase: true");
+    ruleStrings.add("keep row: extract_city_1 == 'Sa'");
+
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
+    String ssUri = "/tmp/dataprep/snapshots/extract_ignore_case.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+  }
+
+  @Test
   public void testExtractRegExp() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
@@ -125,6 +139,47 @@ public class ExprTest {
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/extract_regex.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+  }
+
+  @Test
+  public void testCountPatternLiteral() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("countpattern col: `business`, `desc` on: 'Office'");
+    ruleStrings.add("keep row: countpattern_business_desc >= 2");
+
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
+    String ssUri = "/tmp/dataprep/snapshots/countpattern_literal.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+  }
+
+  @Test
+  public void testCountPatternLiteralIgnoreCase() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("countpattern col: `city`, `desc` on: 'sa' ignoreCase: true");
+    ruleStrings.add("keep row: countpattern_city_desc >= 2");
+
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
+    String ssUri = "/tmp/dataprep/snapshots/countpattern_ignore_case.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+  }
+
+  @Test
+  public void testCountPatternRegExp() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("countpattern col: contract_date, `due` on: /\\\\d+/ quote: '-'");
+
+    String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
+    String ssUri = "/tmp/dataprep/snapshots/countpattern_regexp.csv";
 
     TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }

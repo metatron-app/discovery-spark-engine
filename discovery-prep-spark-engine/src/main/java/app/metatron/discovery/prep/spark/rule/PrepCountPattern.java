@@ -14,7 +14,7 @@
 
 package app.metatron.discovery.prep.spark.rule;
 
-import app.metatron.discovery.prep.parser.preparation.rule.Extract;
+import app.metatron.discovery.prep.parser.preparation.rule.CountPattern;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
@@ -23,38 +23,53 @@ import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
-public class PrepExtract extends PrepRule {
+public class PrepCountPattern extends PrepRule {
 
   public Dataset<Row> transform(Dataset<Row> df, Rule rule) throws AnalysisException {
-    Extract extract = (Extract) rule;
-    Expression col = extract.getCol();
-    Expression on = extract.getOn();
-    Integer limit = extract.getLimit();
-    Expression quote = extract.getQuote();
-    Boolean ignoreCase = extract.getIgnoreCase();
+    CountPattern countPattern = (CountPattern) rule;
+    Expression col = countPattern.getCol();
+    Expression on = countPattern.getOn();
+    Boolean ignoreCase = countPattern.getIgnoreCase();
+    Expression quote = countPattern.getQuote();
 
     SparkUtil.createTempView(df, "temp");
-
-    List<String> targetColNames = getIdentifierList(col);
-    String[] colNames = df.columns();
 
     String patternStr = getPatternStr(on, ignoreCase);
     String quoteStr = getQuoteStr(quote);
     patternStr = modifyPatternStrWithQuote(patternStr, quoteStr);
+
+    List<String> targetColNames = getIdentifierList(col);
+    String[] colNames = df.columns();
+
+    int lastColno = -1;
+    for (int i = 0; i < df.columns().length; i++) {
+      if (targetColNames.contains(colNames[i])) {
+        lastColno = i;
+      }
+    }
+    assert lastColno >= 0 : countPattern;
 
     String sql = "SELECT ";
     for (int i = 0; i < colNames.length; i++) {
       String colName = colNames[i];
       sql = String.format("%s`%s`, ", sql, colName);
 
-      if (!targetColNames.contains(colName)) {
+      if (i != lastColno) {
         continue;
       }
 
-      for (int j = 0; j < limit; j++) {
-        sql = String.format("%sregexp_extract_ex(`%s`, '%s', %d, '%s') AS `extract_%s_%d`, ",
-                sql, colName, patternStr, j, quoteStr, colName, j + 1);
+      String countExpr = "";
+      String newColName = "countpattern_";
+
+      for (String targetColName : targetColNames) {
+        countExpr = String
+                .format("%scount_pattern_ex(`%s`, '%s', '%s') + ", countExpr, targetColName, patternStr, quoteStr);
+        newColName += targetColName + "_";
       }
+      countExpr = countExpr.substring(0, countExpr.length() - 3);
+      newColName = newColName.substring(0, newColName.length() - 1);
+
+      sql = String.format("%s%s AS %s, ", sql, countExpr, newColName);
     }
 
     sql = sql.substring(0, sql.length() - 2) + " FROM temp";
