@@ -15,8 +15,11 @@
 package app.metatron.discovery.prep.spark.rest;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.testng.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import app.metatron.discovery.prep.spark.util.SparkUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
@@ -26,12 +29,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
 
 public class TestUtil {
@@ -303,6 +310,57 @@ public class TestUtil {
     }
 
     return line.split(",").length;
+  }
+
+  public static String escapeSpecialCharacters(String data) {
+    String escapedData = data.replaceAll("\\R", " ");
+    if (data.contains(",") || data.contains("\"") || data.contains("'")) {
+      data = data.replace("\"", "\"\"");
+      escapedData = "\"" + data + "\"";
+    }
+    return escapedData;
+  }
+
+  public static String[] escape(String[] coldatas) {
+    String[] escaped = new String[coldatas.length];
+    for (int i = 0; i < coldatas.length; i++) {
+      escaped[i] = escapeSpecialCharacters(coldatas[i]);
+    }
+    return escaped;
+  }
+
+  public static String convertToCSV(String[] coldatas) {
+    return StringUtils.join(escape(coldatas), ",");
+  }
+
+  private static final String CSV_PATH = "/tmp/discovery-spark-engine.test.csv";
+
+  public static String writeToCsv(String[][] dataLines) throws IOException {
+    File csvOutputFile = new File(CSV_PATH);
+    csvOutputFile.createNewFile();
+    try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
+      for (String[] line : dataLines) {
+        String csv = convertToCSV(line);
+        pw.println(csv);
+      }
+    }
+    assertTrue(csvOutputFile.exists());
+    return CSV_PATH;
+  }
+
+  public static Dataset<Row> readAsCsvFile(String[][] dataLines) throws IOException {
+    return SparkUtil.getSession().read().csv(writeToCsv(dataLines));
+  }
+
+  public static void assertRow(Row row, Object[] objs) {
+    assertEquals(objs.length, row.size() - 1);    // -1 for rowid
+    for (int i = 0; i < objs.length; i++) {
+      if (objs[i] == null) {
+        assertNull(row.get(i));
+        continue;
+      }
+      assertEquals(objs[i], row.get(i));
+    }
   }
 }
 

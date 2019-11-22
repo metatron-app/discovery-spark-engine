@@ -14,7 +14,6 @@
 
 package app.metatron.discovery.prep.spark.util;
 
-import app.metatron.discovery.prep.parser.preparation.rule.CountPattern;
 import app.metatron.discovery.prep.spark.udf.CountPatternEx;
 import app.metatron.discovery.prep.spark.udf.RegexpExtractEx;
 import app.metatron.discovery.prep.spark.udf.SplitEx;

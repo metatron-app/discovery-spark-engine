@@ -46,7 +46,7 @@ public class PrepSet extends PrepRule {
       }
 
       // FIXME: "$col" in literal case
-      String strExpr = stringifyExpr(value).str.replace("$col", "`" + colName + "`");
+      String strExpr = stringifyExpr(value).str.replace("$col", colName);
       sql = String.format("%s%s AS %s, ", sql, strExpr, colName);
     }
     sql = sql.substring(0, sql.length() - 2) + " FROM temp";
