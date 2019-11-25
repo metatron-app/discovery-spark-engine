@@ -41,13 +41,7 @@ public class PrepCountPattern extends PrepRule {
     List<String> targetColNames = getIdentifierList(col);
     String[] colNames = df.columns();
 
-    int lastColno = -1;
-    for (int i = 0; i < df.columns().length; i++) {
-      if (targetColNames.contains(colNames[i])) {
-        lastColno = i;
-      }
-    }
-    assert lastColno >= 0 : countPattern;
+    int lastColno = getLastColno(targetColNames, colNames);
 
     String sql = "SELECT ";
     for (int i = 0; i < colNames.length; i++) {

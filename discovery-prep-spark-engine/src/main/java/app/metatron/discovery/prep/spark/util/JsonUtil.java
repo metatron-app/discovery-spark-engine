@@ -108,7 +108,7 @@ public class JsonUtil {
   }
 
   public static StructType getSchemaFromJson(String storedUri)
-      throws URISyntaxException, IOException {
+          throws URISyntaxException, IOException {
     String line = readLineFromJson(storedUri);
     ObjectMapper mapper = new ObjectMapper();
 
@@ -141,7 +141,7 @@ public class JsonUtil {
   }
 
   public static long writeJson(Dataset<Row> df, String strUri, Configuration conf, int limitRows)
-      throws URISyntaxException, IOException {
+          throws URISyntaxException, IOException {
     Writer writer;
     URI uri;
     long totalLines = 0L;
@@ -159,8 +159,8 @@ public class JsonUtil {
       case "hdfs":
         if (conf == null) {
           LOGGER.error(
-              "writeJson(): Required property missing: check polaris.dataprep.hadoopConfDir: strUri={}",
-              strUri);
+                  "writeJson(): Required property missing: check polaris.dataprep.hadoopConfDir: strUri={}",
+                  strUri);
         }
         Path path = new Path(uri);
 
@@ -170,8 +170,8 @@ public class JsonUtil {
           hdfsFs = FileSystem.get(conf);
         } catch (IOException e) {
           LOGGER.error(
-              "writeJson(): Cannot get file system: check polaris.dataprep.hadoopConfDir: strUri={}",
-              strUri);
+                  "writeJson(): Cannot get file system: check polaris.dataprep.hadoopConfDir: strUri={}",
+                  strUri);
           throw e;
         }
 
@@ -180,8 +180,8 @@ public class JsonUtil {
           hos = hdfsFs.create(path);
         } catch (IOException e) {
           LOGGER.error(
-              "writeJson(): Cannot create a file: polaris.dataprep.hadoopConfDir: strUri={}",
-              strUri);
+                  "writeJson(): Cannot create a file: polaris.dataprep.hadoopConfDir: strUri={}",
+                  strUri);
           throw e;
         }
 
@@ -206,8 +206,8 @@ public class JsonUtil {
           fos = new FileOutputStream(file);
         } catch (FileNotFoundException e) {
           LOGGER.error(
-              "writeJson(): FileNotFoundException: Check the permission of snapshot directory: strUri={}",
-              strUri);
+                  "writeJson(): FileNotFoundException: Check the permission of snapshot directory: strUri={}",
+                  strUri);
           throw e;
         }
 

@@ -26,6 +26,7 @@ import app.metatron.discovery.prep.spark.rule.PrepJoin;
 import app.metatron.discovery.prep.spark.rule.PrepKeep;
 import app.metatron.discovery.prep.spark.rule.PrepMerge;
 import app.metatron.discovery.prep.spark.rule.PrepMove;
+import app.metatron.discovery.prep.spark.rule.PrepNest;
 import app.metatron.discovery.prep.spark.rule.PrepRename;
 import app.metatron.discovery.prep.spark.rule.PrepReplace;
 import app.metatron.discovery.prep.spark.rule.PrepSet;
@@ -97,6 +98,8 @@ public class PrepTransformer {
         return (new PrepUnion()).transform(df, slaveDfs);
       case "join":
         return (new PrepJoin()).transform(df, rule, slaveDfs);
+      case "nest":
+        return (new PrepNest()).transform(df, rule);
       case "unnest":
         return (new PrepUnnest()).transform(df, rule);
     }

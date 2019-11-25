@@ -56,5 +56,21 @@ public class NestUnnestTest {
     TestUtil.assertRow(rows.get(1), new Object[]{1L, 1L, "3"});
     TestUtil.assertRow(rows.get(2), new Object[]{3L, 1L, "4"});
     TestUtil.assertRow(rows.get(3), new Object[]{null, null, null});
+
+    Dataset<Row> df2 = transformer.applyRule(df, "nest col: a, b, c into: 'map' as: d", null);
+    df2.show();
+    rows = df2.collectAsList();
+    TestUtil.assertRow(rows.get(0), new Object[]{3L, 1L, "2", "{\"a\":3,\"b\":1,\"c\":\"2\"}"});
+    TestUtil.assertRow(rows.get(1), new Object[]{1L, 1L, "3", "{\"a\":1,\"b\":1,\"c\":\"3\"}"});
+    TestUtil.assertRow(rows.get(2), new Object[]{3L, 1L, "4", "{\"a\":3,\"b\":1,\"c\":\"4\"}"});
+    TestUtil.assertRow(rows.get(3), new Object[]{null, null, null, "{}"});
+
+    df2 = transformer.applyRule(df, "nest col: a, b, c into: 'array' as: d", null);
+    df2.show();
+    rows = df2.collectAsList();
+    TestUtil.assertRow(rows.get(0), new Object[]{3L, 1L, "2", "[3,1,\"2\"]"});
+    TestUtil.assertRow(rows.get(1), new Object[]{1L, 1L, "3", "[1,1,\"3\"]"});
+    TestUtil.assertRow(rows.get(2), new Object[]{3L, 1L, "4", "[3,1,\"4\"]"});
+    TestUtil.assertRow(rows.get(3), new Object[]{null, null, null, "[null,null,null]"});
   }
 }

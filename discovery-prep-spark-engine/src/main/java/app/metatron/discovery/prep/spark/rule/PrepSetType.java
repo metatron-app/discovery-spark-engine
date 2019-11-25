@@ -52,14 +52,11 @@ public class PrepSetType extends PrepRule {
       switch (toType) {
         case "timestamp":
           sql = String
-              .format("%sCAST(UNIX_TIMESTAMP(`%s`, '%s') AS TIMESTAMP) AS `%s`, ", sql, colName, format,
-                  colName);
+                  .format("%sCAST(UNIX_TIMESTAMP(`%s`, '%s') AS TIMESTAMP) AS `%s`, ", sql, colName, format, colName);
           break;
         case "string":
           if (fromType.equalsIgnoreCase("timestamp")) {
-            sql = String
-                .format("%sFROM_UNIXTIME(UNIX_TIMESTAMP(`%s`), '%s') AS `%s`, ", sql, colName, format,
-                    colName);
+            sql = String.format("%sFROM_UNIXTIME(UNIX_TIMESTAMP(`%s`), '%s') AS `%s`, ", sql, colName, format, colName);
           }
         default:
           sql = String.format("%sCAST(`%s` AS %s) AS `%s`, ", sql, colName, getPhysicalType(toType), colName);

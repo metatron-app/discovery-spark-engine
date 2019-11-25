@@ -28,6 +28,7 @@ import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier.IdentifierArrayExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier.IdentifierExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.RegularExpr;
+import avro.shaded.com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -252,5 +253,28 @@ public class PrepRule {
       assert quote instanceof StringExpr : quote;
       return ((StringExpr) quote).getEscapedValue();
     }
+  }
+
+  public static int getLastColno(List<String> targetColNames, List<String> colNames) {
+    int lastColno = -1;
+    for (int i = 0; i < colNames.size(); i++) {
+      if (targetColNames.contains(colNames.get(i))) {
+        lastColno = i;
+      }
+      assert lastColno >= 0 : String.format("targetColNames=[%s] colNames=[%s]", targetColNames, colNames);
+    }
+    return lastColno;
+  }
+
+  public static int getLastColno(List<String> targetColNames, String[] colNames) {
+    return getLastColno(targetColNames, Arrays.asList(colNames));
+  }
+
+  public String stripQuotes(String str) {
+    assert str != null;
+    if (str.startsWith("'") && str.endsWith("'")) {
+      return str.substring(1, str.length() - 1);
+    }
+    return str;
   }
 }

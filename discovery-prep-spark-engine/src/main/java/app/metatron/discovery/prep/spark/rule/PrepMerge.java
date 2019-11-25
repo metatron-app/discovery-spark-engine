@@ -76,12 +76,4 @@ public class PrepMerge extends PrepRule {
     assert false : colName;
     return -1;
   }
-
-  private String stripQuotes(String str) {
-    assert str != null;
-    if (str.startsWith("'") && str.endsWith("'")) {
-      return str.substring(1, str.length() - 1);
-    }
-    return str;
-  }
 }
