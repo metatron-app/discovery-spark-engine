@@ -28,7 +28,6 @@ import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier.IdentifierArrayExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Identifier.IdentifierExpr;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.RegularExpr;
-import avro.shaded.com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

@@ -72,7 +72,6 @@ public class MultiDatasetTest {
     String ssUri = "/tmp/dataprep/snapshots/join1.csv";
     TestUtil.testFileToFileWithCustomDsInfo(dsInfoA, ssUri);
   }
-//   "join leftSelectCol: id,`id_1_1`,`id_1`,`name` rightSelectCol: `id`,`id_1`,`id_1_1`,`occupation` condition: `id`=`id` && `id_1_1`=`id_1_1` && `id_1`=`id_1` joinType: 'outer' dataset2: 'db6f7937-b6b4-4b4c-a5e4-2a324318bc85'\"\n");
 
   @Test
   public void testJoinOuterAndMultiCol() throws IOException {
@@ -86,8 +85,6 @@ public class MultiDatasetTest {
     ruleStringsForA.add("derive value: id as id2");
     ruleStringsForA.add("join leftSelectCol: id, id2, `name` rightSelectCol: occupation condition: id=id && id2=id2"
             + " joinType: 'outer' dataset2: 'dsB'");
-
-    //   "join leftSelectCol: id,`id_1_1`,`id_1`,`name` rightSelectCol: `id`,`id_1`,`id_1_1`,`occupation` condition: `id`=`id` && `id_1_1`=`id_1_1` && `id_1`=`id_1` joinType: 'outer' dataset2: 'db6f7937-b6b4-4b4c-a5e4-2a324318bc85'\"\n");
 
     ruleStringsForB.add("header");
     ruleStringsForB.add("derive value: id as id2");

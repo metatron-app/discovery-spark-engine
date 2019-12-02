@@ -46,6 +46,7 @@ public class PrepDerive extends PrepRule {
     while (contains(colNames, as)) {
       as = as + "_1";
     }
+    as = stripQuotes(as);
 
     String sql = "SELECT ";
     for (int i = 0; i < colNames.length; i++) {

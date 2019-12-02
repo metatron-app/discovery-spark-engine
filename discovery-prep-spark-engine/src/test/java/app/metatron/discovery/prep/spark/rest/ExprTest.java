@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 
-
 public class ExprTest {
 
   @Test
@@ -42,7 +41,7 @@ public class ExprTest {
 
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("settype col: `price` type: Double");
-    ruleStrings.add("derive value: `price` as: `duplicated_sale_price`");
+    ruleStrings.add("derive value: `price` as: 'duplicated_sale_price'");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
@@ -56,7 +55,7 @@ public class ExprTest {
 
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("settype col: `price` type: Double");
-    ruleStrings.add("derive value: `price` * 100 as: after_inflation");
+    ruleStrings.add("derive value: `price` * 100 as: 'after_inflation'");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/sales.snapshot.csv";
