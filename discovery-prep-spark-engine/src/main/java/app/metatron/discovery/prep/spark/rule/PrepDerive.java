@@ -50,7 +50,7 @@ public class PrepDerive extends PrepRule {
     String sql = "SELECT ";
     for (int i = 0; i < colNames.length; i++) {
       String colName = colNames[i];
-      sql = sql + colName + ", ";
+      sql = String.format("%s`%s`, ", sql, colName);
 
       if (i == lastRelatedColno) {
         sql = String.format("%s%s AS `%s`, ", sql, strExpr, as);
