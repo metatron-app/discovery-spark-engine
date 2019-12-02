@@ -20,6 +20,7 @@ import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPA
 import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_WAREHOUSE_DIR;
 import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_TIMEOUT;
 import static app.metatron.discovery.prep.spark.service.PropertyConstant.STORAGE_STAGEDB_METASTORE_URI;
+import static app.metatron.discovery.prep.spark.util.StringUtil.makeParsable;
 
 import app.metatron.discovery.prep.parser.preparation.RuleVisitorParser;
 import app.metatron.discovery.prep.parser.preparation.rule.Header;
@@ -169,6 +170,47 @@ public class DiscoveryPrepSparkEngineService {
     LOGGER.info("transformDf(): done: ssId={}", ssId);
   }
 
+  private boolean isUnique(String[] colNames, int until, String colName) {
+    for (int i = 0; i < until; i++) {
+      if (colName.equalsIgnoreCase(colNames[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private String getUniqueName(String[] colNames, int until, String colName) {
+    for (int i = 1; i < Integer.MAX_VALUE; i++) {
+      String newColName = String.format("%s_%d", colName, i);
+      if (isUnique(colNames, until, newColName)) {
+        return newColName;
+      }
+    }
+    assert false : colName;
+    return null;
+  }
+
+  private Dataset<Row> modifyColNamesIfNeeded(Dataset<Row> df) {
+    String[] colNames = df.columns();
+    for (int i = 0; i < colNames.length; i++) {
+      String colName = colNames[i];
+      if (!colName.equals(makeParsable(colName))) {
+        df = df.withColumnRenamed(colName, makeParsable(colName));
+      }
+    }
+
+    colNames = df.columns();
+    for (int i = 1; i < colNames.length; i++) {
+      if (isUnique(colNames, i, colNames[i])) {
+        continue;
+      }
+      String newColName = getUniqueName(colNames, i, colNames[i]);
+      df = df.withColumnRenamed(colNames[i], newColName);
+      colNames = df.columns();
+    }
+    return df;
+  }
+
   private void transformRecursive(String ssId, Map<String, Object> dsInfo)
           throws IOException, URISyntaxException, AnalysisException {
     String dsId = (String) dsInfo.get("origTeddyDsId");
@@ -177,6 +219,10 @@ public class DiscoveryPrepSparkEngineService {
     List<String> ruleStrings = (List<String>) dsInfo.get("ruleStrings");
     boolean header = removeUnusedRules(ruleStrings);
     Dataset<Row> df = createStage0(dsInfo, header);
+
+    if (header) {
+      df = modifyColNamesIfNeeded(df);
+    }
 
     // Transform upstreams first.
     List<Map<String, Object>> upstreamDatasetInfos = (List<Map<String, Object>>) dsInfo.get("upstreamDatasetInfos");

@@ -14,6 +14,9 @@
 
 package app.metatron.discovery.prep.spark.rule;
 
+import static app.metatron.discovery.prep.spark.util.StringUtil.makeParsable;
+import static app.metatron.discovery.prep.spark.util.StringUtil.modifyDuplicatedColName;
+
 import app.metatron.discovery.prep.parser.preparation.rule.Header;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import org.apache.spark.sql.Dataset;
@@ -43,7 +46,7 @@ public class PrepHeader extends PrepRule {
       } else {
         newColName = "column" + (i + 1);
       }
-      newDf = newDf.withColumnRenamed(colNames[i], newColName);
+      newDf = newDf.withColumnRenamed(colNames[i], modifyDuplicatedColName(df, makeParsable(newColName)));
     }
 
     return newDf;
