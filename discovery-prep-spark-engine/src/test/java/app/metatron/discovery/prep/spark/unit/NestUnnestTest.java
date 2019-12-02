@@ -12,9 +12,10 @@
  * limitations under the License.
  */
 
-package app.metatron.discovery.prep.spark.rest;
+package app.metatron.discovery.prep.spark.unit;
 
 import app.metatron.discovery.prep.spark.PrepTransformer;
+import app.metatron.discovery.prep.spark.rest.TestUtil;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.io.IOException;
 import java.util.List;
@@ -23,7 +24,6 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 
 public class NestUnnestTest {
 
