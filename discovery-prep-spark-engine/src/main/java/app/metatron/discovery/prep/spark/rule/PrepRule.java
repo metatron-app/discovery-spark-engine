@@ -261,8 +261,8 @@ public class PrepRule {
       if (targetColNames.contains(colNames.get(i))) {
         lastColno = i;
       }
-      assert lastColno >= 0 : String.format("targetColNames=[%s] colNames=[%s]", targetColNames, colNames);
     }
+    assert lastColno >= 0 : String.format("targetColNames=[%s] colNames=[%s]", targetColNames, colNames);
     return lastColno;
   }
 
