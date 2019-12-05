@@ -26,7 +26,7 @@ fi
 if [ "$1" == "-t" ]; then
   JAR=discovery-prep-spark-engine/target/discovery-prep-spark-engine-1.2.0.jar
   PORT=5300
-  java -jar $JAR --server.port=$PORT
+  java -Xmx8g -Xms8g -jar $JAR --server.port=$PORT
   exit 0
 fi
 
