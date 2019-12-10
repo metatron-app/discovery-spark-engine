@@ -49,16 +49,16 @@ public class SparkUtil {
               .appName(appName)
               .master(masterUri);
 
-      if (metastoreUris != null) {
-        assert warehouseDir != null : metastoreUris;
-
+      if (metastoreUris != null && warehouseDir != null && warehouseDir.startsWith("hdfs")) {
+        builder = builder
+                .config("hive.metastore.uris", metastoreUris)
+                .config("spark.sql.warehouse.dir", warehouseDir)
+                .config("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation", "true")
+                .enableHiveSupport();
+      } else {
         builder = builder
                 .config("spark.sql.catalogImplementation", "in-memory")
                 .config("spark.driver.maxResultSize", "8g");
-        //                .config("spark.sql.warehouse.dir", warehouseDir)
-        //                .config("hive.metastore.uris", metastoreUris)
-        //                .config("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation", "true")
-        //                .enableHiveSupport();
       }
       session = builder.getOrCreate();
 
