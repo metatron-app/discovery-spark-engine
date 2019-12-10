@@ -45,7 +45,7 @@ public class FileService {
   private static Logger LOGGER = LoggerFactory.getLogger(FileService.class);
 
   private String hadoopConfDir;
-  private Configuration hadoopConf = null;
+  private Configuration hadoopConf;
   private Integer limitRows = null;
 
   public void setPrepPropertiesInfo(Map<String, Object> prepPropertiesInfo) throws IOException {

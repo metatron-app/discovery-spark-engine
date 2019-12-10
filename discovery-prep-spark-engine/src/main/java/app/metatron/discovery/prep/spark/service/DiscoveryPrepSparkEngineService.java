@@ -60,6 +60,9 @@ public class DiscoveryPrepSparkEngineService {
   @Autowired
   StagingDbService stagingDbService;
 
+  @Autowired
+  DatabaseService databaseService;
+
   private Integer timeout;
   private Integer maxFetchSize;
   private Callback callback;
@@ -113,6 +116,7 @@ public class DiscoveryPrepSparkEngineService {
 
     fileService.setPrepPropertiesInfo(prepPropertiesInfo);
     stagingDbService.setPrepPropertiesInfo(prepPropertiesInfo);
+    databaseService.setPrepPropertiesInfo(prepPropertiesInfo);
 
     callback = new Callback(callbackInfo, ssId);
     callback.updateSnapshot(ssId, "ruleCntTotal", String.valueOf(countAllRules(dsInfo)));
@@ -272,6 +276,7 @@ public class DiscoveryPrepSparkEngineService {
         break;
 
       case "DATABASE":
+        df = databaseService.createStage0(dsInfo);
       default:
         throw new IllegalArgumentException("createStage0(): not supported importType: " + importType);
     }
