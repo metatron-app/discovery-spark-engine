@@ -61,7 +61,7 @@ public class PrepRule {
     List<String> arr = new ArrayList();
 
     if (expr instanceof StringExpr) {
-      String colName = expr.toString();
+      String colName = StringUtils.strip(expr.toString(), "'");
       arr.add(colName);
       relatedColNames.add(colName);
     } else {
