@@ -240,7 +240,6 @@ public class DiscoveryPrepSparkEngineService {
     PrepTransformer transformer = new PrepTransformer();
     for (String ruleString : ruleStrings) {
       df = transformer.applyRule(df, ruleString, getSlaveDfs(ruleString));
-      df.show();
       callback.incrRuleCntDone(ssId);
     }
     cache.put(dsId, df);
@@ -262,7 +261,7 @@ public class DiscoveryPrepSparkEngineService {
   private Dataset<Row> createStage0(Map<String, Object> dsInfo, boolean header) throws IOException, URISyntaxException {
     Dataset<Row> df;
     String dsId = ((String) dsInfo.get("origTeddyDsId"));
-    LOGGER.debug("createStage0(): dsId={}", dsId);
+    LOGGER.info("createStage0(): dsId={} dsInfo={}", dsId, dsInfo);
 
     String importType = (String) dsInfo.get("importType");
     switch (importType) {
