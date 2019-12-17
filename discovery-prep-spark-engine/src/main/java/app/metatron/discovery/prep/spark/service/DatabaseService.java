@@ -60,15 +60,17 @@ public class DatabaseService {
     String connectUri = (String) datasetInfo.get("connectUri");
     String username = (String) datasetInfo.get("username");
     String password = (String) datasetInfo.get("password");
-    String dbName = (String) datasetInfo.get("dbName");
-    String tblName = (String) datasetInfo.get("tblName");
+    String sourceQuery = (String) datasetInfo.get("sourceQuery");
+    String dbtable = String.format("(%s) as e", sourceQuery);
+
+    LOGGER.warn("DatabaseService.createStage0(): url={} user={} password={} dbtable={}", connectUri, username, password, dbtable);
 
     return SparkUtil.getSession().read()
             .format("jdbc")
             .option("url", connectUri)
             .option("user", username)
             .option("password", password)
-            .option("dbtable", dbName + "." + tblName)
+            .option("dbtable", dbtable)
             .load();
   }
 }

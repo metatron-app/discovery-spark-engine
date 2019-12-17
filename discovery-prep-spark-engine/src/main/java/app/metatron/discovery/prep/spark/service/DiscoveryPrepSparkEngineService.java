@@ -277,6 +277,8 @@ public class DiscoveryPrepSparkEngineService {
 
       case "DATABASE":
         df = databaseService.createStage0(dsInfo);
+        break;
+
       default:
         throw new IllegalArgumentException("createStage0(): not supported importType: " + importType);
     }
