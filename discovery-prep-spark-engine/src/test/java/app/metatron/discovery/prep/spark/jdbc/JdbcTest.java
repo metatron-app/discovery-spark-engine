@@ -44,8 +44,7 @@ public class JdbcTest {
     dsInfo.put("connectUri", "jdbc:mysql://localhost:3306");
     dsInfo.put("username", "polaris");
     dsInfo.put("password", "polaris");
-    dsInfo.put("dbName", "test");
-    dsInfo.put("tblName", "t");
+    dsInfo.put("sourceQuery", "select * from test.t");
 
     Dataset<Row> df = databaseService.createStage0(dsInfo);
     df.show();
@@ -59,8 +58,7 @@ public class JdbcTest {
     dsInfo.put("connectUri", "jdbc:postgresql://localhost:5432/testdb");
     dsInfo.put("username", "jhkim");
     dsInfo.put("password", "jhkim");
-    dsInfo.put("dbName", "s2");
-    dsInfo.put("tblName", "t2");
+    dsInfo.put("sourceQuery", "select * from s2.t2");
 
     Dataset<Row> df = databaseService.createStage0(dsInfo);
     df.show();
