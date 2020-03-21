@@ -99,7 +99,7 @@ public class SparkUtil {
       // Suppress "table not found"
     }
     String fullName = dbName + "." + tblName;
-    getSession().sql(String.format("CREATE TABLE %s AS SELECT * FROM %s LIMIT %d", fullName, "temp", limitRows));
+    getSession().sql(String.format("CREATE TABLE %s USING ORC AS SELECT * FROM %s LIMIT %d", fullName, "temp", limitRows));
   }
 
   public static Dataset<Row> selectTableAll(String dbName, String tblName, int limitRows) {
