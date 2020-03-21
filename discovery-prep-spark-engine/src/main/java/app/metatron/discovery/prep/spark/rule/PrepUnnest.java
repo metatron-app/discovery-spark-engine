@@ -19,8 +19,8 @@ import static app.metatron.discovery.prep.spark.util.SparkUtil.getSession;
 import app.metatron.discovery.prep.parser.preparation.rule.Rule;
 import app.metatron.discovery.prep.parser.preparation.rule.Unnest;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
+import app.metatron.discovery.prep.spark.util.GlobalObjectMapper;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,13 +48,13 @@ public class PrepUnnest extends PrepRule {
 
       switch (into.toUpperCase()) {
         case "MAP":
-          Map<String, Object> map = (new ObjectMapper()).readValue(jsonStr, Map.class);
+          Map<String, Object> map = GlobalObjectMapper.getDefaultMapper().readValue(jsonStr, Map.class);
           for (String key : map.keySet()) {
             elemKeys.add(key);
           }
           break;
         case "ARRAY":
-          List<Object> list = (new ObjectMapper()).readValue(jsonStr, List.class);
+          List<Object> list = GlobalObjectMapper.getDefaultMapper().readValue(jsonStr, List.class);
           for (int i = 0; i < list.size(); i++) {
             elemIdxs.add(i);
           }

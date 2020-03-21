@@ -27,6 +27,10 @@ public class SplitEx implements UDF4<String, String, Integer, Integer, String> {
     // "San Francisco" -> "San", "Francisco"
     // "New York City" -> "New", "York City"
 
+    if (coldata == null) {
+      return null;
+    }
+
     // Skip as n
     for (int i = 0; i < nth; i++) {
       int idx = coldata.indexOf(on, begin);

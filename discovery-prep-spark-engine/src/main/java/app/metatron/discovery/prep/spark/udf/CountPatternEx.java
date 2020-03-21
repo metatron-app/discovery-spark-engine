@@ -22,6 +22,10 @@ public class CountPatternEx implements UDF3<String, String, String, Integer> {
 
   @Override
   public Integer call(String coldata, String patternStr, String quoteStr) throws Exception {
+    if (coldata == null) {
+      return null;
+    }
+
     int count = 0;
 
     if (org.apache.commons.lang3.StringUtils.countMatches(coldata, quoteStr) % 2 == 1) {

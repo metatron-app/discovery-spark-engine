@@ -74,10 +74,10 @@ public class PrepJoin extends PrepRule {
 
     String sql = "SELECT ";
     for (int i = 0; i < lSelectCols.size(); i++) {
-      sql = String.format("%sa.%s AS %s, ", sql, lSelectCols.get(i), outCols.get(i));
+      sql = String.format("%sa.`%s` AS `%s`, ", sql, lSelectCols.get(i), outCols.get(i));
     }
     for (int i = 0; i < rSelectCols.size(); i++) {
-      sql = String.format("%sb.%s AS %s, ", sql, rSelectCols.get(i), outCols.get(i + lSelectCols.size()));
+      sql = String.format("%sb.`%s` AS `%s`, ", sql, rSelectCols.get(i), outCols.get(i + lSelectCols.size()));
     }
     sql = sql.substring(0, sql.length() - 2);
     sql = String.format("%s FROM temp_left AS a %s temp_right AS b ON %s ", sql, getJoinStr(joinType), condStr);
@@ -95,7 +95,7 @@ public class PrepJoin extends PrepRule {
       BinAsExpr asExpr = (BinAsExpr) cond;
       String lColName = ((IdentifierExpr) asExpr.getLeft()).getValue();
       String rColName = ((IdentifierExpr) asExpr.getRight()).getValue();
-      return String.format("a.%s = b.%s", lColName, rColName);
+      return String.format("a.`%s` = b.`%s`", lColName, rColName);
     }
 
     String msg = "Wrong join condition expression: " + cond;

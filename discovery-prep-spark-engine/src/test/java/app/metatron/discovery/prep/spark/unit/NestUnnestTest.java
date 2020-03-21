@@ -31,8 +31,8 @@ public class NestUnnestTest {
   public static void setup() {
     SparkUtil.setAppName("DiscoverySparkEngine");
     SparkUtil.setMasterUri("local");
-    SparkUtil.setWarehouseDir("hdfs://localhost:9000/user/hive/warehouse");
-    SparkUtil.setMetastoreUris("thrift://localhost:9083");
+//    SparkUtil.setWarehouseDir("hdfs://localhost:9000/user/hive/warehouse");
+//    SparkUtil.setMetastoreUris("thrift://localhost:9083");
   }
 
   @Test

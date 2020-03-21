@@ -14,7 +14,6 @@
 
 package app.metatron.discovery.prep.spark.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -107,14 +106,18 @@ public class JsonUtil {
     }
   }
 
+  public static final String UTF8_BOM = "\uFEFF";
+
   public static StructType getSchemaFromJson(String storedUri)
           throws URISyntaxException, IOException {
     String line = readLineFromJson(storedUri);
-    ObjectMapper mapper = new ObjectMapper();
+    if (line.startsWith(UTF8_BOM)) {
+      line = line.substring(1);
+    }
 
-    Map<String, String> map;
+    Map<String, Object> map;
     try {
-      map = mapper.readValue(line, Map.class);
+      map = GlobalObjectMapper.getDefaultMapper().readValue(line, Map.class);
     } catch (IOException e) {
       LOGGER.error("getSchemaFromJson(): IOException: strUri={}", storedUri);
       throw e;
@@ -222,7 +225,6 @@ public class JsonUtil {
 
     String[] colNames = df.columns();
     StringBuilder sb = new StringBuilder();
-    ObjectMapper mapper = new ObjectMapper();
 
     Iterator iter = df.toLocalIterator();
     while (iter.hasNext()) {
@@ -237,7 +239,7 @@ public class JsonUtil {
         sb.append("\"");
 
         sb.append(":");
-        sb.append(mapper.writeValueAsString(row.get(i)));
+        sb.append(GlobalObjectMapper.getDefaultMapper().writeValueAsString(row.get(i)));
         sb.append(",");
       }
 

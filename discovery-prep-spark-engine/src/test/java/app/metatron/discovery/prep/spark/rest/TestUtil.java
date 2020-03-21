@@ -19,8 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import app.metatron.discovery.prep.spark.util.GlobalObjectMapper;
 import app.metatron.discovery.prep.spark.util.SparkUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import java.io.BufferedReader;
@@ -205,8 +205,7 @@ public class TestUtil {
     con.setRequestProperty("Accept", "application/json");
     con.setDoOutput(true);
 
-    ObjectMapper mapper = new ObjectMapper();
-    String jsonArgs = mapper.writeValueAsString(args);
+    String jsonArgs = GlobalObjectMapper.getDefaultMapper().writeValueAsString(args);
 
     try (OutputStream os = con.getOutputStream()) {
       byte[] input = jsonArgs.getBytes("utf-8");
@@ -228,7 +227,8 @@ public class TestUtil {
 
       System.out.println(response.toString());
 
-      Map<String, Object> responseMap = mapper.readValue(response.toString(), HashMap.class);
+      Map<String, Object> responseMap = GlobalObjectMapper.getDefaultMapper()
+              .readValue(response.toString(), HashMap.class);
       assertEquals((String) responseMap.get("result"), "SUCCEEDED");
     }
   }

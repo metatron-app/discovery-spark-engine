@@ -14,7 +14,7 @@
 
 package app.metatron.discovery.prep.spark.udf;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import app.metatron.discovery.prep.spark.util.GlobalObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.spark.sql.api.java.UDF2;
@@ -22,8 +22,6 @@ import scala.collection.Iterator;
 import scala.collection.Seq;
 
 public class ArrayToJsonEx implements UDF2<Seq<Object>, Seq<Object>, Object> {
-
-  private static ObjectMapper mapper = new ObjectMapper();
 
   @Override
   public String call(Seq<Object> coldatas, Seq<Object> typeStrs) throws Exception {
@@ -37,7 +35,7 @@ public class ArrayToJsonEx implements UDF2<Seq<Object>, Seq<Object>, Object> {
       String coldata = (String) coldataIter.next();
       list.add(cast(coldata, typeStr));
     }
-    return mapper.writeValueAsString(list);
+    return GlobalObjectMapper.getDefaultMapper().writeValueAsString(list);
   }
 
   private Object cast(Object obj, String typeStr) {

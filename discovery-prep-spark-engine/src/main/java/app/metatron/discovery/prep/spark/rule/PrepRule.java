@@ -114,7 +114,7 @@ public class PrepRule {
     }
   }
 
-  private String wrapIdentifier(String identifier) {
+  public static String wrapIdentifier(String identifier) {
     if (!identifier.matches("[_a-zA-Z\u0080-\uFFFF]+[_a-zA-Z0-9\u0080-\uFFFF]*")) {  // if has odd characters
       return "`" + identifier + "`";
     }
@@ -160,8 +160,9 @@ public class PrepRule {
       List<String> wrappedIdentifiers = new ArrayList();
 
       for (String colName : arrExpr.getValue()) {
-        wrappedIdentifiers.add(wrapIdentifier(colName));
-        relatedColNames.add(colName);
+        String wrappedIdentifier = wrapIdentifier(colName);
+        wrappedIdentifiers.add(wrappedIdentifier);
+        relatedColNames.add(wrappedIdentifier);
       }
 
       result.str = joinWithComma(wrappedIdentifiers);
@@ -169,7 +170,8 @@ public class PrepRule {
       return result;
     } else if (expr instanceof Identifier) {
       String colName = expr.toString();
-      relatedColNames.add(colName);
+      String wrappedIdentifier = wrapIdentifier(colName);
+      relatedColNames.add(wrappedIdentifier);
       return new StrExpResult(wrapIdentifier(colName));
     } else if (expr instanceof FunctionExpr) {
       return new StrExpResult(stringifyFuncExpr((FunctionExpr) expr));

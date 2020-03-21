@@ -24,7 +24,6 @@ import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class JdbcTest {
 
@@ -36,7 +35,7 @@ public class JdbcTest {
     SparkUtil.setMetastoreUris("thrift://localhost:9083");
   }
 
-  @Test
+  //  @Test
   public void testMySQL() throws IOException, AnalysisException, URISyntaxException, ClassNotFoundException {
     DatabaseService databaseService = new DatabaseService();
 
@@ -50,7 +49,7 @@ public class JdbcTest {
     df.show();
   }
 
-  @Test
+  //  @Test
   public void testPostgreSQL() throws IOException, AnalysisException, URISyntaxException, ClassNotFoundException {
     DatabaseService databaseService = new DatabaseService();
 

@@ -22,6 +22,10 @@ public class RegexpExtractEx implements UDF4<String, String, Integer, String, St
 
   @Override
   public String call(String coldata, String patternStr, Integer nth, String quoteStr) throws Exception {
+    if (coldata == null) {
+      return null;
+    }
+
     if (org.apache.commons.lang3.StringUtils.countMatches(coldata, quoteStr) % 2 == 1) {
       coldata = coldata.substring(0, coldata.lastIndexOf(quoteStr));
     }
