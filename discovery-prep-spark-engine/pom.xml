@@ -38,7 +38,7 @@
 
     <!--We need jackson version >= 2.9.9.2 because of security vulnerability-->
     <!--Also need < 3.0 because Spark module demands-->
-    <jackson.version>2.9.9</jackson.version>
+    <jackson.version>2.10.3</jackson.version>
 
   </properties>
 
