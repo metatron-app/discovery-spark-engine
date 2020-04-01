@@ -17,16 +17,17 @@
 # specific language governing permissions and limitations
 # under the License.
 
-ENGINE=discovery-prep-spark-engine
-VER=1.2.0
-
-DEPLOY_NAME=$ENGINE-$VER
+VERSION=1.2.0
+DEPLOY_NAME=discovery-spark-engine-$VERSION
+MODULE_NAME=discovery-prep-spark-engine
+SCRIPT_NAME=run-prep-spark-engine.sh
 
 mkdir $DEPLOY_NAME
-cp $ENGINE/target/$DEPLOY_NAME.jar $DEPLOY_NAME
-cp run-prep-spark-engine.sh $DEPLOY_NAME
+cp $MODULE_NAME/target/$MODULE_NAME-$VERSION.jar $DEPLOY_NAME
+cp $SCRIPT_NAME $DEPLOY_NAME
 tar zcvf $DEPLOY_NAME.tar.gz $DEPLOY_NAME
-
 rm -rf $DEPLOY_NAME
+
+# Currently, the result is discovery-spark-engine-1.2.0.tar.gz that contains discovery-spark-engine/ and the script.
 
 #eof
