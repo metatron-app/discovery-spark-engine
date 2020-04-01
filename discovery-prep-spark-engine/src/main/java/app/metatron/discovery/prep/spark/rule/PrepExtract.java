@@ -41,6 +41,7 @@ public class PrepExtract extends PrepRule {
     String patternStr = getPatternStr(on, ignoreCase);
     String quoteStr = getQuoteStr(quote);
     patternStr = modifyPatternStrWithQuote(patternStr, quoteStr);
+    patternStr = patternStr.replace("\\", "\\\\");
 
     String sql = "SELECT ";
     for (int i = 0; i < colNames.length; i++) {
@@ -52,7 +53,7 @@ public class PrepExtract extends PrepRule {
       }
 
       for (int j = 0; j < limit; j++) {
-        sql = String.format("%sregexp_extract_ex(`%s`, '%s', %d, '%s') AS `extract_%s_%d`, ",
+        sql = String.format("%sregexp_extract_ex(`%s`, '%s', %d, '%s') AS `extract_%s%d`, ",
                 sql, colName, patternStr, j, quoteStr, colName, j + 1);
       }
     }
@@ -61,3 +62,6 @@ public class PrepExtract extends PrepRule {
     return SparkUtil.getSession().sql(sql);
   }
 }
+
+
+

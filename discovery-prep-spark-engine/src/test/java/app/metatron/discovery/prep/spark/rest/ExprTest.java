@@ -103,6 +103,20 @@ public class ExprTest {
   }
 
   @Test
+  public void testReplaceRegExpOnUrl() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("header rownum: 1");
+    ruleStrings.add("extract col: `url` on: /utm_source=\\w+/ limit: 1");
+    ruleStrings.add("replace col: `extract_url1` on: 'utm_source=' with: ''");
+
+    String dsUri = TestUtil.getResourcePath("csv/utm_test.csv");
+    String ssUri = "/tmp/dataprep/snapshots/replace_regex.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
+  }
+
+  @Test
   public void testExtractLiteral() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
@@ -121,7 +135,7 @@ public class ExprTest {
 
     ruleStrings.add("header rownum: 1");
     ruleStrings.add("extract col: `city`, `state` on: 'sa' limit: 2 ignoreCase: true");
-    ruleStrings.add("keep row: extract_city_1 == 'Sa'");
+    ruleStrings.add("keep row: extract_city1 == 'Sa'");
 
     String dsUri = TestUtil.getResourcePath("csv/sales_named.csv");
     String ssUri = "/tmp/dataprep/snapshots/extract_ignore_case.csv";
