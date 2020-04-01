@@ -16,6 +16,7 @@ package app.metatron.discovery.prep.spark.util;
 
 import app.metatron.discovery.prep.spark.udf.ArrayToJsonEx;
 import app.metatron.discovery.prep.spark.udf.CountPatternEx;
+import app.metatron.discovery.prep.spark.udf.IsNullEx;
 import app.metatron.discovery.prep.spark.udf.RegexpExtractEx;
 import app.metatron.discovery.prep.spark.udf.SplitEx;
 import org.apache.spark.sql.AnalysisException;
@@ -66,6 +67,7 @@ public class SparkUtil {
       session.udf().register("regexp_extract_ex", regexp_extract_ex, DataTypes.StringType);
       session.udf().register("count_pattern_ex", count_pattern_ex, DataTypes.IntegerType);
       session.udf().register("array_to_json_ex", array_to_json_ex, DataTypes.StringType);
+      session.udf().register("isnull", is_null_ex, DataTypes.BooleanType);
     }
 
     return session;
@@ -75,6 +77,7 @@ public class SparkUtil {
   private static RegexpExtractEx regexp_extract_ex = new RegexpExtractEx();
   private static CountPatternEx count_pattern_ex = new CountPatternEx();
   private static ArrayToJsonEx array_to_json_ex = new ArrayToJsonEx();
+  private static IsNullEx is_null_ex = new IsNullEx();
 
   public static void stopSession() {
     if (session != null) {
