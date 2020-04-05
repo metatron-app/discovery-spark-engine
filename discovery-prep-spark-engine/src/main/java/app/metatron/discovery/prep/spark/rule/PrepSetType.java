@@ -58,6 +58,11 @@ public class PrepSetType extends PrepRule {
           if (fromType.equalsIgnoreCase("timestamp")) {
             sql = String.format("%sFROM_UNIXTIME(UNIX_TIMESTAMP(`%s`), '%s') AS `%s`, ", sql, colName, format, colName);
           }
+        case "array":
+        case "map":
+          assert fromType.equals("string");
+          sql = String.format("%s`%s`, ", sql, colName);
+          break;
         default:
           sql = String.format("%sCAST(`%s` AS %s) AS `%s`, ", sql, colName, getPhysicalType(toType), colName);
           break;

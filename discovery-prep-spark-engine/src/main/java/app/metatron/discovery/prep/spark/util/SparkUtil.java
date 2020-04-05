@@ -16,6 +16,8 @@ package app.metatron.discovery.prep.spark.util;
 
 import app.metatron.discovery.prep.spark.udf.ArrayToJsonEx;
 import app.metatron.discovery.prep.spark.udf.CountPatternEx;
+import app.metatron.discovery.prep.spark.udf.FromArrayEx;
+import app.metatron.discovery.prep.spark.udf.FromMapEx;
 import app.metatron.discovery.prep.spark.udf.IsNullEx;
 import app.metatron.discovery.prep.spark.udf.RegexpExtractEx;
 import app.metatron.discovery.prep.spark.udf.SplitEx;
@@ -68,6 +70,8 @@ public class SparkUtil {
       session.udf().register("count_pattern_ex", count_pattern_ex, DataTypes.IntegerType);
       session.udf().register("array_to_json_ex", array_to_json_ex, DataTypes.StringType);
       session.udf().register("isnull", is_null_ex, DataTypes.BooleanType);
+      session.udf().register("from_array_ex", from_array_ex, DataTypes.StringType);
+      session.udf().register("from_map_ex", from_map_ex, DataTypes.StringType);
     }
 
     return session;
@@ -78,6 +82,8 @@ public class SparkUtil {
   private static CountPatternEx count_pattern_ex = new CountPatternEx();
   private static ArrayToJsonEx array_to_json_ex = new ArrayToJsonEx();
   private static IsNullEx is_null_ex = new IsNullEx();
+  private static FromMapEx from_map_ex = new FromMapEx();
+  private static FromArrayEx from_array_ex = new FromArrayEx();
 
   public static void stopSession() {
     if (session != null) {
@@ -102,7 +108,8 @@ public class SparkUtil {
       // Suppress "table not found"
     }
     String fullName = dbName + "." + tblName;
-    getSession().sql(String.format("CREATE TABLE %s USING ORC AS SELECT * FROM %s LIMIT %d", fullName, "temp", limitRows));
+    getSession()
+            .sql(String.format("CREATE TABLE %s USING ORC AS SELECT * FROM %s LIMIT %d", fullName, "temp", limitRows));
   }
 
   public static Dataset<Row> selectTableAll(String dbName, String tblName, int limitRows) {

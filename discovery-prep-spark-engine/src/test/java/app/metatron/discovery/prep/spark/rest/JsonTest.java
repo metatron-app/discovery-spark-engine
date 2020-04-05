@@ -39,7 +39,24 @@ public class JsonTest {
   }
 
   @Test
-  public void testUnnest() throws IOException {
+  public void testUnnest1() throws IOException {
+    List<String> ruleStrings = new ArrayList();
+
+    ruleStrings.add("settype col: b type: array");
+    ruleStrings.add("settype col: c type: map");
+    ruleStrings.add("unnest col: c into: map idx: 'c1', 'c3'");
+    ruleStrings.add("unnest col: b into: array idx: 0, 1");
+    ruleStrings.add("settype col: b_0 type: map");
+    ruleStrings.add("unnest col: b_0 into: map idx: 'b1', 'b2'");
+
+    String dsUri = TestUtil.getResourcePath("json/complex.json");
+    String ssUri = "/tmp/dataprep/snapshots/unnest.csv";
+
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, null);
+  }
+
+  @Test
+  public void testUnnest2() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("settype col: `column2` type: map");
