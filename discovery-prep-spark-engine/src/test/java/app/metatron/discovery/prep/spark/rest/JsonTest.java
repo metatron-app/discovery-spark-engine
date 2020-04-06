@@ -52,7 +52,7 @@ public class JsonTest {
     String dsUri = TestUtil.getResourcePath("json/complex.json");
     String ssUri = "/tmp/dataprep/snapshots/unnest.csv";
 
-    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, null);
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri);
   }
 
   @Test
@@ -60,7 +60,7 @@ public class JsonTest {
     List<String> ruleStrings = new ArrayList();
 
     ruleStrings.add("settype col: `column2` type: map");
-    ruleStrings.add("unnest col: `column1` into: MAP idx: 'A'");
+    ruleStrings.add("unnest col: `column2` into: MAP idx: 'A'");
 
     String dsUri = TestUtil.getResourcePath("csv/json_in_column.csv.txt");
     String ssUri = "/tmp/dataprep/snapshots/unnest.csv";
@@ -69,15 +69,17 @@ public class JsonTest {
   }
 
   @Test
-  public void testUnnestAll() throws IOException {
+  public void testFlatten() throws IOException {
     List<String> ruleStrings = new ArrayList();
 
-    ruleStrings.add("settype col: `column2` type: map");
-    ruleStrings.add("unnest col: `column2` into: MAP idx: ");   // UI sends like this. I don't like it.
+    ruleStrings.add("settype col: column2 type: array");
+    ruleStrings.add("flatten col: column2");
+    ruleStrings.add("settype col: column2 type: map");
+    ruleStrings.add("unnest col: column2 into: map idx: 'a', 'b', 'c'");
 
-    String dsUri = TestUtil.getResourcePath("csv/json_in_column.csv.txt");
-    String ssUri = "/tmp/dataprep/snapshots/unnest_all.csv";
+    String dsUri = TestUtil.getResourcePath("csv/array.csv");
+    String ssUri = "/tmp/dataprep/snapshots/flatten.csv";
 
-    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, 3);  // Need to implement escaping to use getColCntByFirstLine()
+    TestUtil.testFileToFile(dsUri, ruleStrings, ssUri, 3);
   }
 }

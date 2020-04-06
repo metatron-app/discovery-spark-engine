@@ -21,6 +21,7 @@ import app.metatron.discovery.prep.spark.rule.PrepDelete;
 import app.metatron.discovery.prep.spark.rule.PrepDerive;
 import app.metatron.discovery.prep.spark.rule.PrepDrop;
 import app.metatron.discovery.prep.spark.rule.PrepExtract;
+import app.metatron.discovery.prep.spark.rule.PrepFlatten;
 import app.metatron.discovery.prep.spark.rule.PrepHeader;
 import app.metatron.discovery.prep.spark.rule.PrepJoin;
 import app.metatron.discovery.prep.spark.rule.PrepKeep;
@@ -102,6 +103,8 @@ public class PrepTransformer {
         return (new PrepNest()).transform(df, rule);
       case "unnest":
         return (new PrepUnnest()).transform(df, rule);
+      case "flatten":
+        return (new PrepFlatten()).transform(df, rule);
     }
 
     LOGGER.error("Unsupported rule: " + ruleString);

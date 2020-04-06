@@ -21,6 +21,7 @@ import app.metatron.discovery.prep.spark.udf.FromMapEx;
 import app.metatron.discovery.prep.spark.udf.IsNullEx;
 import app.metatron.discovery.prep.spark.udf.RegexpExtractEx;
 import app.metatron.discovery.prep.spark.udf.SplitEx;
+import app.metatron.discovery.prep.spark.udf.ToArrayTypeEx;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -72,6 +73,7 @@ public class SparkUtil {
       session.udf().register("isnull", is_null_ex, DataTypes.BooleanType);
       session.udf().register("from_array_ex", from_array_ex, DataTypes.StringType);
       session.udf().register("from_map_ex", from_map_ex, DataTypes.StringType);
+      session.udf().register("to_array_type_ex", to_array_type_ex, DataTypes.createArrayType(DataTypes.StringType));
     }
 
     return session;
@@ -84,6 +86,7 @@ public class SparkUtil {
   private static IsNullEx is_null_ex = new IsNullEx();
   private static FromMapEx from_map_ex = new FromMapEx();
   private static FromArrayEx from_array_ex = new FromArrayEx();
+  private static ToArrayTypeEx to_array_type_ex = new ToArrayTypeEx();
 
   public static void stopSession() {
     if (session != null) {
