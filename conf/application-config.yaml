@@ -266,7 +266,7 @@ polaris:
   dataprep:
     hadoopConfDir: /Users/jhkim/opt/hadoop/etc/hadoop
     localBaseDir: /Users/jhkim/git-repos/metatron-discovery/dataprep
-    stagingBaseDir: hdfs://localhost:9000/user/hive/dataprep
+    stagingBaseDir: hdfs://localhost/user/hive/dataprep
     sampling:
       limitRows: 10000
     etl:
