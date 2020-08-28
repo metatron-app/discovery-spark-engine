@@ -14,7 +14,7 @@
 
 package app.metatron.discovery.prep.spark.service;
 
-import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_LIMIT_ROWS;
+import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_LIMIT_ROWS;
 
 import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class DatabaseService {
   private Integer limitRows = null;
 
   public void setPrepPropertiesInfo(Map<String, Object> prepPropertiesInfo) throws IOException {
-    limitRows = (Integer) prepPropertiesInfo.get(ETL_LIMIT_ROWS);
+    limitRows = (Integer) prepPropertiesInfo.get(ETL_SPARK_LIMIT_ROWS);
   }
 
   public long createSnapshot(Dataset<Row> df, Map<String, Object> snapshotInfo) throws URISyntaxException, IOException {

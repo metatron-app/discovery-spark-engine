@@ -25,8 +25,8 @@ public class PropertyConstant {
   public static final String ETL_JVM_OPTIONS = "polaris.dataprep.etl.jvmOptions";
   public static final String ETL_EXPLICIT_GC = "polaris.dataprep.etl.explicitGC";
 
-  public static final String ETL_SPARK_JAR = "polaris.dataprep.etl.spark.jar";
-  public static final String ETL_SPARK_PORT = "polaris.dataprep.etl.spark.port";
+  public static final String ETL_SPARK_LIMIT_ROWS = "polaris.dataprep.etl.spark.limitRows";
+  public static final String ETL_SPARK_HOSTNAME = "polaris.dataprep.etl.spark.hostname";
   public static final String ETL_SPARK_APP_NAME = "polaris.dataprep.etl.spark.appName";
   public static final String ETL_SPARK_MASTER = "polaris.dataprep.etl.spark.master";
   public static final String ETL_SPARK_WAREHOUSE_DIR = "polaris.dataprep.etl.spark.warehouseDir";

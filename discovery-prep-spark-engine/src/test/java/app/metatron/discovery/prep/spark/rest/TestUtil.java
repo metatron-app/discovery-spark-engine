@@ -111,7 +111,7 @@ public class TestUtil {
     prepPropertiesInfo.put("polaris.dataprep.etl.spark.master", "local");
     prepPropertiesInfo.put("polaris.dataprep.etl.spark.warehouseDir", warehouseDir);
 
-    prepPropertiesInfo.put("polaris.dataprep.etl.limitRows", 30000);
+    prepPropertiesInfo.put("polaris.dataprep.etl.spark.limitRows", 30000);
 
     return prepPropertiesInfo;
   }

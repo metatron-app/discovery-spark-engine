@@ -14,7 +14,7 @@
 
 package app.metatron.discovery.prep.spark.service;
 
-import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_LIMIT_ROWS;
+import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_LIMIT_ROWS;
 import static app.metatron.discovery.prep.spark.service.PropertyConstant.HADOOP_CONF_DIR;
 
 import app.metatron.discovery.prep.spark.util.CsvUtil;
@@ -50,7 +50,7 @@ public class FileService {
 
   public void setPrepPropertiesInfo(Map<String, Object> prepPropertiesInfo) throws IOException {
     hadoopConfDir = (String) prepPropertiesInfo.get(HADOOP_CONF_DIR);
-    limitRows = (Integer) prepPropertiesInfo.get(ETL_LIMIT_ROWS);
+    limitRows = (Integer) prepPropertiesInfo.get(ETL_SPARK_LIMIT_ROWS);
 
     if (hadoopConfDir != null) {
       hadoopConf = Util.getHadoopConf(hadoopConfDir);
