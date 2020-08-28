@@ -49,7 +49,7 @@ case $command in
     $(mkdir -p $LOG_DIR)
   fi
 
-    nohup $JAVA -Xmx8g -Xms8g -cp $CONF_DIR/ -Dlogging.config=$CONF_DIR/log4j2.xml -Dfile.encoding=UTF-8 -jar $DISCOVERY_SPARK_ENGINE_HOME/$JAR --spring.config.location=file:$CONF_DIR/application.properties >> $LOG_DIR/discovery-spark-engine.log 2>&1 &
+    nohup $JAVA -Xmx8g -Xms8g -XX:MaxMetaspaceSize=256m -cp $CONF_DIR/ -Dlogging.config=$CONF_DIR/log4j2.xml -Dfile.encoding=UTF-8 -jar $DISCOVERY_SPARK_ENGINE_HOME/$JAR --spring.config.location=file:$CONF_DIR/application.properties >> $LOG_DIR/discovery-spark-engine.log 2>&1 &
     discovery_spark_engine_PID=$!
     echo $discovery_spark_engine_PID > $pid
     echo "Discovery Spark Engine successfully started ($discovery_spark_engine_PID)"
