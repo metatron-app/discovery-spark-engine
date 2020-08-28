@@ -54,7 +54,7 @@ public class PrepJoin extends PrepRule {
     outCols.addAll(lSelectCols);
     for (int i = 0; i < rSelectCols.size(); i++) {
       String colName = rSelectCols.get(i);
-      if (lSelectCols.contains(colName)) {
+      if (colsContains(lSelectCols, colName)) {
         outCols.add("r_" + colName);
       } else {
         outCols.add(colName);
@@ -120,5 +120,14 @@ public class PrepJoin extends PrepRule {
         LOGGER.error(msg);
         throw new IllegalArgumentException(msg);
     }
+  }
+
+  boolean colsContains(List<String> oldColNames, String colName) {
+    for (int i = 0; i < oldColNames.size(); i++) {
+      if (oldColNames.get(i).equalsIgnoreCase(colName)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
