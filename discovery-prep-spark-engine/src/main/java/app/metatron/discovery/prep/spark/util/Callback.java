@@ -35,7 +35,6 @@ public class Callback {
 
   private static Logger LOGGER = LoggerFactory.getLogger(Callback.class);
 
-  String hostname;
   int port;
   String oauth_token;
 
@@ -45,7 +44,6 @@ public class Callback {
   }
 
   public Callback(Map<String, Object> callbackInfo, String ssId) {
-    hostname = (String) callbackInfo.get("hostname");
     port = Integer.valueOf((String) callbackInfo.get("port"));
     oauth_token = (String) callbackInfo.get("oauth_token");
 
@@ -70,7 +68,7 @@ public class Callback {
 
     URI snapshot_uri = UriComponentsBuilder.newInstance()
             .scheme("http")
-            .host(hostname)
+            .host("localhost")
             .port(port)
             .path("/api/preparationsnapshots/")
             .path(ssId)
