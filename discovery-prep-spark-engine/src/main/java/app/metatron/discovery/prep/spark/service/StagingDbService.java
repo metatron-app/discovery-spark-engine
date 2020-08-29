@@ -24,6 +24,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,10 +32,10 @@ public class StagingDbService {
 
   private static Logger LOGGER = LoggerFactory.getLogger(StagingDbService.class);
 
-  private Integer limitRows = null;
+  @Value("${limitRows}")
+  private Integer limitRows;
 
   public void setPrepPropertiesInfo(Map<String, Object> prepPropertiesInfo) throws IOException {
-    limitRows = (Integer) prepPropertiesInfo.get(ETL_SPARK_LIMIT_ROWS);
   }
 
   public long createSnapshot(Dataset<Row> df, Map<String, Object> snapshotInfo) {

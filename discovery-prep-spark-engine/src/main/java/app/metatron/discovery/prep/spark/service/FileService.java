@@ -14,7 +14,6 @@
 
 package app.metatron.discovery.prep.spark.service;
 
-import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_LIMIT_ROWS;
 import static app.metatron.discovery.prep.spark.service.PropertyConstant.HADOOP_CONF_DIR;
 
 import app.metatron.discovery.prep.spark.util.CsvUtil;
@@ -37,6 +36,7 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,11 +46,12 @@ public class FileService {
 
   private String hadoopConfDir;
   private Configuration hadoopConf;
-  private Integer limitRows = null;
+
+  @Value("${limitRows}")
+  private Integer limitRows;
 
   public void setPrepPropertiesInfo(Map<String, Object> prepPropertiesInfo) throws IOException {
     hadoopConfDir = (String) prepPropertiesInfo.get(HADOOP_CONF_DIR);
-    limitRows = (Integer) prepPropertiesInfo.get(ETL_SPARK_LIMIT_ROWS);
 
     if (hadoopConfDir != null) {
       hadoopConf = Util.getHadoopConf(hadoopConfDir);
@@ -104,6 +105,9 @@ public class FileService {
     String storedUri = (String) datasetInfo.get("storedUri");
     String extensionType = FilenameUtils.getExtension(storedUri);
     Integer columnCount = (Integer) datasetInfo.get("manualColumnCount");
+    Dataset<Row> df = null;
+
+    LOGGER.info("FileService.createState0(): start: storedUri={} columnCount={}", storedUri, columnCount);
 
     // If not .json, treat as a CSV.
     switch (extensionType.toUpperCase()) {
@@ -118,7 +122,9 @@ public class FileService {
                 .option("delimiter", delimiter);
 
         if (header) {  // columnCount null is used in test codes
-          return reader.option("header", header).load(storedUri).limit(limitRows);
+          LOGGER.info("FileService.load(): reader={} header={} limitRows={}", reader, header, limitRows);
+          df = reader.option("header", header).load(storedUri).limit(limitRows);
+          break;
         }
 
         // A CSV dataset should be headered or set column count manually.
@@ -131,7 +137,12 @@ public class FileService {
           fields.add(field);
         }
         schema = DataTypes.createStructType(fields);
-        return reader.schema(schema).load(storedUri).limit(limitRows);
+
+        LOGGER.info("FileService.load(): reader={} schema={} limitRows={}", reader, schema, limitRows);
+        df = reader.schema(schema).load(storedUri).limit(limitRows);
     }
+
+    LOGGER.info("FileService.createState0(): end");
+    return df;
   }
 }
