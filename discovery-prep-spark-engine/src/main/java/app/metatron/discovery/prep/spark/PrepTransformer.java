@@ -58,6 +58,12 @@ public class PrepTransformer {
     parser = new RuleVisitorParser();
   }
 
+  public PrepTransformer(String sparkAppName, String sparkMaster, String hiveMetastoreUris, String sparkSqlWarehouseDir,
+          String sparkDriverMaxResultSize) {
+    session = SparkUtil.getSession(sparkAppName, sparkMaster, hiveMetastoreUris, sparkSqlWarehouseDir, sparkDriverMaxResultSize);
+    parser = new RuleVisitorParser();
+  }
+
   public Dataset<Row> applyRule(Dataset<Row> df, String ruleString, List<Dataset<Row>> slaveDfs)
           throws AnalysisException, IOException {
     Rule rule = parser.parse(ruleString);

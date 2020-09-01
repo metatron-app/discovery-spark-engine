@@ -38,33 +38,34 @@ public class SparkUtil {
 
   private static SparkSession session;
 
-  private static String appName;
-  private static String masterUri;
-  private static String metastoreUris;
-  private static String warehouseDir;
+  public static SparkSession getSession(String sparkAppName, String sparkMaster, String hiveMetastoreUris,
+          String sparkSqlWarehouseDir, String sparkDriverMaxResultSize) {
 
-  public static SparkSession getSession() {
     if (session == null) {
       LOGGER.info("creating session:");
-      LOGGER.info("appName={} masterUri={} spark.sql.warehouse.dir={}", appName, masterUri, warehouseDir);
-      LOGGER.info("spark.sql.catalogImplementation={} hive.metastore.uris={}", "hive", metastoreUris);
-      LOGGER.info("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation={}", "true");
+      LOGGER.info("spark.app.name={} spark.master={}", sparkAppName, sparkMaster);
+
+      LOGGER.info("spark.sql.warehouse.dir={} hive.metastore.uris={}", sparkSqlWarehouseDir, hiveMetastoreUris);
+      boolean useHive = hiveMetastoreUris != null && sparkSqlWarehouseDir != null;
+
+      LOGGER.info("spark.sql.catalogImplementation={}", useHive);
+      LOGGER.info("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation={}", useHive);
 
       Builder builder = SparkSession.builder()
-              .appName(appName)
-              .master(masterUri);
+              .appName(sparkAppName)
+              .master(sparkMaster);
 
-      if (metastoreUris != null && warehouseDir != null && warehouseDir.startsWith("hdfs")) {
+      if (useHive) {
         builder = builder
-                .config("hive.metastore.uris", metastoreUris)
-                .config("spark.sql.warehouse.dir", warehouseDir)
+                .config("hive.metastore.uris", hiveMetastoreUris)
+                .config("spark.sql.warehouse.dir", sparkSqlWarehouseDir)
                 .config("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation", "true")
                 .enableHiveSupport();
       } else {
         builder = builder
-                .config("spark.sql.catalogImplementation", "in-memory")
-                .config("spark.driver.maxResultSize", "8g");
+                .config("spark.sql.catalogImplementation", "in-memory");
       }
+      builder = builder.config("spark.driver.maxResultSize", sparkDriverMaxResultSize);
       session = builder.getOrCreate();
 
       session.udf().register("split_ex", split_ex, DataTypes.StringType);
@@ -76,6 +77,16 @@ public class SparkUtil {
       session.udf().register("from_array_ex", from_array_ex, DataTypes.StringType);
       session.udf().register("from_map_ex", from_map_ex, DataTypes.StringType);
       session.udf().register("to_array_type_ex", to_array_type_ex, DataTypes.createArrayType(DataTypes.StringType));
+    }
+
+    return session;
+  }
+
+  public static SparkSession getSession() {
+    if (session == null) {
+      // Only for tests!
+      // In a production environment, the session should be created with the above constructor.
+      return getSession("testApp", "local", null, null, "1g");
     }
 
     return session;
@@ -121,29 +132,5 @@ public class SparkUtil {
   public static Dataset<Row> selectTableAll(String dbName, String tblName, int limitRows) {
     String fullName = dbName + "." + tblName;
     return getSession().sql(String.format("SELECT * FROM %s LIMIT %d", fullName, limitRows));
-  }
-
-  public static void setAppName(String appName) {
-    SparkUtil.appName = appName;
-  }
-
-  public static void setMasterUri(String masterUri) {
-    SparkUtil.masterUri = masterUri;
-  }
-
-  public static void setMetastoreUris(String metastoreUris) {
-    SparkUtil.metastoreUris = metastoreUris;
-  }
-
-  public static String getMetastoreUris() {
-    return metastoreUris;
-  }
-
-  public static void setWarehouseDir(String warehouseDir) {
-    SparkUtil.warehouseDir = warehouseDir;
-  }
-
-  public static String getWarehouseDir() {
-    return warehouseDir;
   }
 }

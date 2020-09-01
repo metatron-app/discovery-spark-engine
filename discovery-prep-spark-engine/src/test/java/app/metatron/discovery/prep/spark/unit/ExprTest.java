@@ -31,8 +31,8 @@ public class ExprTest {
 
   @BeforeClass
   public static void setup() {
-    SparkUtil.setAppName("DiscoverySparkEngine");
-    SparkUtil.setMasterUri("local");
+//    SparkUtil.setAppName("DiscoverySparkEngine");
+//    SparkUtil.setMasterUri("local");
 //    SparkUtil.setWarehouseDir("hdfs://localhost:9000/user/hive/warehouse");
 //    SparkUtil.setMetastoreUris("thrift://localhost:9083");
   }

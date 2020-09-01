@@ -32,16 +32,14 @@ public class StagingDbService {
 
   private static Logger LOGGER = LoggerFactory.getLogger(StagingDbService.class);
 
-  @Value("${limitRows}")
-  private Integer limitRows;
+  @Value("${limitRows:2000000}")
+  Integer limitRows;
 
   public void setPrepPropertiesInfo(Map<String, Object> prepPropertiesInfo) throws IOException {
   }
 
   public long createSnapshot(Dataset<Row> df, Map<String, Object> snapshotInfo) {
     LOGGER.info("StagingDbService.createSnapshot(): started");
-
-    assert SparkUtil.getMetastoreUris() != null;
 
     String dbName = (String) snapshotInfo.get("dbName");
     String tblName = (String) snapshotInfo.get("tblName");

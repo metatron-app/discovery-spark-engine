@@ -14,11 +14,9 @@
 
 package app.metatron.discovery.prep.spark.service;
 
-import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_MAX_FETCH_SIZE;
 import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_APP_NAME;
 import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_MASTER;
 import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_SPARK_WAREHOUSE_DIR;
-import static app.metatron.discovery.prep.spark.service.PropertyConstant.ETL_TIMEOUT;
 import static app.metatron.discovery.prep.spark.service.PropertyConstant.STORAGE_STAGEDB_METASTORE_URI;
 import static app.metatron.discovery.prep.spark.util.StringUtil.makeParsable;
 
@@ -31,7 +29,6 @@ import app.metatron.discovery.prep.parser.preparation.rule.expr.Constant;
 import app.metatron.discovery.prep.parser.preparation.rule.expr.Expression;
 import app.metatron.discovery.prep.spark.PrepTransformer;
 import app.metatron.discovery.prep.spark.util.Callback;
-import app.metatron.discovery.prep.spark.util.SparkUtil;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -64,27 +61,39 @@ public class DiscoveryPrepSparkEngineService {
   @Autowired
   DatabaseService databaseService;
 
-  @Value("${callback.hostname:localhost}")
-  String callbackHostname;
+  @Value("${spark.app.name:null}")
+  String sparkAppName;                        // overriden by discovery's application.yaml
 
-  private Integer timeout;
-  private Integer maxFetchSize;
+  @Value("${spark.master:null}")
+  String sparkMaster;                         // overriden by discovery's application.yaml
+
+  @Value("${hive.metastore.uris:null}")
+  String hiveMetastoreUris;                   // overriden by discovery's application.yaml
+
+  @Value("${spark.sql.warehouse.dir:null}")
+  String sparkSqlWarehouseDir;                // overriden by discovery's application.yaml
+
+  @Value("${spark.driver.maxResultSize:4g}")
+  String sparkDriverMaxResultSize;            // use own application.properties
+
+  @Value("${callback.hostname:localhost}")
+  String callbackHostname;                    // use own application.properties
+
+  private PrepTransformer transformer;
+
   private Callback callback;
 
   private Map<String, Dataset<Row>> cache = new HashMap();
 
+  private String override(String str, String nullable) {
+    return nullable != null ? nullable : str;
+  }
+
   private void setPrepPropertiesInfo(Map<String, Object> prepPropertiesInfo) {
-    timeout = (Integer) prepPropertiesInfo.get(ETL_TIMEOUT);
-    maxFetchSize = (Integer) prepPropertiesInfo.get(ETL_MAX_FETCH_SIZE);
-
-    SparkUtil.setAppName((String) prepPropertiesInfo.get(ETL_SPARK_APP_NAME));
-    SparkUtil.setMasterUri((String) prepPropertiesInfo.get(ETL_SPARK_MASTER));
-    SparkUtil.setMetastoreUris((String) prepPropertiesInfo.get(STORAGE_STAGEDB_METASTORE_URI));
-    if (SparkUtil.getMetastoreUris() != null) {
-      SparkUtil.setWarehouseDir((String) prepPropertiesInfo.get(ETL_SPARK_WAREHOUSE_DIR));
-      assert SparkUtil.getMetastoreUris() != null;
-    }
-
+    sparkAppName = override(sparkAppName, (String) prepPropertiesInfo.get(ETL_SPARK_APP_NAME));
+    sparkMaster = override(sparkMaster, (String) prepPropertiesInfo.get(ETL_SPARK_MASTER));
+    hiveMetastoreUris = override(hiveMetastoreUris, (String) prepPropertiesInfo.get(STORAGE_STAGEDB_METASTORE_URI));
+    sparkSqlWarehouseDir = override(sparkSqlWarehouseDir, (String) prepPropertiesInfo.get(ETL_SPARK_WAREHOUSE_DIR));
   }
 
   private void putStackTraceIntoCustomField(String ssId, Exception e) {
@@ -125,6 +134,9 @@ public class DiscoveryPrepSparkEngineService {
     callback = new Callback(callbackInfo, ssId, callbackHostname);
     callback.updateSnapshot(ssId, "ruleCntTotal", String.valueOf(countAllRules(dsInfo)));
     callback.updateAsRunning(ssId);
+
+    transformer = new PrepTransformer(sparkAppName, sparkMaster, hiveMetastoreUris, sparkSqlWarehouseDir,
+            sparkDriverMaxResultSize);
 
     if (ssType == null) {
       callback.updateAsFailed(ssId);
@@ -240,8 +252,6 @@ public class DiscoveryPrepSparkEngineService {
       }
     }
 
-    // Transform
-    PrepTransformer transformer = new PrepTransformer();
     for (String ruleString : ruleStrings) {
       df = transformer.applyRule(df, ruleString, getSlaveDfs(ruleString));
       callback.incrRuleCntDone(ssId);

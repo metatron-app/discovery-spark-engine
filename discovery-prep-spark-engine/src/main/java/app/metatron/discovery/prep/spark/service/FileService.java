@@ -47,8 +47,8 @@ public class FileService {
   private String hadoopConfDir;
   private Configuration hadoopConf;
 
-  @Value("${limitRows}")
-  private Integer limitRows;
+  @Value("${limitRows:2000000}")
+  Integer limitRows;
 
   public void setPrepPropertiesInfo(Map<String, Object> prepPropertiesInfo) throws IOException {
     hadoopConfDir = (String) prepPropertiesInfo.get(HADOOP_CONF_DIR);
