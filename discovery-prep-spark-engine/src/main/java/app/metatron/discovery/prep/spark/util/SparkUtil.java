@@ -38,6 +38,8 @@ public class SparkUtil {
 
   private static SparkSession session;
 
+  private static String sparkSqlWarehouseDir;
+
   public static SparkSession getSession(String sparkAppName, String sparkMaster, String hiveMetastoreUris,
           String sparkSqlWarehouseDir, String sparkDriverMaxResultSize) {
 
@@ -62,6 +64,7 @@ public class SparkUtil {
                 .config("spark.sql.warehouse.dir", sparkSqlWarehouseDir)
                 .config("spark.sql.legacy.allowCreatingManagedTableUsingNonemptyLocation", "true")
                 .enableHiveSupport();
+        SparkUtil.sparkSqlWarehouseDir = sparkSqlWarehouseDir;
       } else {
         builder = builder
                 .config("spark.sql.catalogImplementation", "in-memory");
@@ -127,9 +130,14 @@ public class SparkUtil {
     } catch (AnalysisException e) {
       // Suppress "table not found"
     }
+
+    String location = sparkSqlWarehouseDir + "/" + dbName + "/" + tblName;
     String fullName = dbName + "." + tblName;
-    getSession()
-            .sql(String.format("CREATE TABLE %s USING ORC AS SELECT * FROM %s LIMIT %d", fullName, "temp", limitRows));
+    String sql = String
+            .format("CREATE TABLE %s USING ORC LOCATION '%s' AS SELECT * FROM %s LIMIT %d", fullName, location, "temp",
+                    limitRows);
+    LOGGER.info("createTable(): " + sql);
+    getSession().sql(sql);
   }
 
   public static Dataset<Row> selectTableAll(String dbName, String tblName, int limitRows) {
