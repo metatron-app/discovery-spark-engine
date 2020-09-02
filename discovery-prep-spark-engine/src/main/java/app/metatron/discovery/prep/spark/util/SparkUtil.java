@@ -45,7 +45,8 @@ public class SparkUtil {
       LOGGER.info("creating session:");
       LOGGER.info("spark.app.name={} spark.master={}", sparkAppName, sparkMaster);
 
-      LOGGER.info("spark.sql.warehouse.dir={} hive.metastore.uris={}", sparkSqlWarehouseDir, hiveMetastoreUris);
+      LOGGER.info("spark.sql.warehouse.dir={}", sparkSqlWarehouseDir);
+      LOGGER.info("hive.metastore.uris={}", hiveMetastoreUris);
       boolean useHive = hiveMetastoreUris != null && sparkSqlWarehouseDir != null;
 
       LOGGER.info("spark.sql.catalogImplementation={}", useHive);
@@ -65,6 +66,8 @@ public class SparkUtil {
         builder = builder
                 .config("spark.sql.catalogImplementation", "in-memory");
       }
+
+      LOGGER.info("spark.driver.maxResultSize={}", sparkDriverMaxResultSize);
       builder = builder.config("spark.driver.maxResultSize", sparkDriverMaxResultSize);
       session = builder.getOrCreate();
 
